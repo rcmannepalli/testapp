@@ -1,6 +1,7 @@
-# Respect & Listening Platform — Product Design Doc
+# SugApp — Respect & Listening Platform — Product Design Doc
 
 > Status: Draft v0.1 — strategy north star. Not yet implemented.
+> Product name: **SugApp**
 > Last updated: 2026-06-18
 
 ## 1. One-sentence thesis
