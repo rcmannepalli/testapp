@@ -39,9 +39,27 @@ pip install anthropic
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-## Run
+## Test it
+
+There are two ways to run it, depending on whether you have an API key.
+
+### 1. Offline demo (no key, no cost) — see the pipeline immediately
+
+`--demo` renders a bundled fixture of expected model output (`<transcript>.findings.json`)
+instead of calling the API, so you can see the whole flow — findings, evidence, coaching
+rewrites, per-person mirror, Respect Index, k-anonymity — with zero spend:
 
 ```bash
+python score.py --demo sample_transcripts/standup.json
+```
+
+This is the fastest way to sanity-check the output format and the aggregation logic.
+
+### 2. Live scoring (needs a key) — the real test of the model
+
+```bash
+pip install anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
 python score.py sample_transcripts/standup.json
 ```
 
@@ -50,6 +68,10 @@ or pipe your own transcript on stdin:
 ```bash
 cat my_transcript.json | python score.py -
 ```
+
+The real validation is comparing live output to your own judgment on transcripts you know:
+does it catch the dismissive line you'd have flagged? Does it avoid false positives on
+blunt-but-respectful disagreement? Tune `rubric.py` from what you see.
 
 ### Transcript format
 

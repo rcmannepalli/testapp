@@ -10,10 +10,9 @@ scores it against the Respect & Listening rubric using Claude, and prints per-me
 findings (with evidence + coaching rewrites) plus a k-anonymized team Respect Index.
 """
 import json
+import os
 import sys
 from collections import defaultdict
-
-import anthropic
 
 from rubric import DISRESPECTFUL, FINDINGS_SCHEMA, RESPECTFUL, system_prompt
 
@@ -29,7 +28,7 @@ def load_transcript(path: str) -> dict:
     return data
 
 
-def score_transcript(client: anthropic.Anthropic, transcript: dict) -> list[dict]:
+def score_transcript(client, transcript: dict) -> list[dict]:
     """Return the model's findings for every message in the transcript."""
     numbered = [
         {"message_index": i, "author": m.get("author", "unknown"), "text": m["text"]}
@@ -108,11 +107,26 @@ def render(transcript: dict, findings: list[dict]) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
+    args = sys.argv[1:]
+    demo = "--demo" in args
+    paths = [a for a in args if not a.startswith("--")]
+    if len(paths) != 1:
         sys.exit(__doc__)
-    transcript = load_transcript(sys.argv[1])
-    client = anthropic.Anthropic()
-    findings = score_transcript(client, transcript)
+    transcript = load_transcript(paths[0])
+
+    if demo:
+        # Offline mode: render a bundled fixture of expected model output so the
+        # pipeline (evidence, rewrites, Respect Index, k-anonymity) can be seen
+        # with no API key and no token spend. Looks for <transcript>.findings.json.
+        fixture = os.path.splitext(paths[0])[0] + ".findings.json"
+        if not os.path.exists(fixture):
+            sys.exit(f"--demo needs a fixture next to the transcript: {fixture}")
+        findings = json.load(open(fixture, encoding="utf-8"))["findings"]
+    else:
+        import anthropic  # only needed for a live scoring run
+
+        findings = score_transcript(anthropic.Anthropic(), transcript)
+
     render(transcript, findings)
 
 
