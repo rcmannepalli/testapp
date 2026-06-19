@@ -1,0 +1,14 @@
+{
+  "channel": "#arch-review",
+  "messages": [
+    {"author": "Ana", "text": "This approach is wrong — the latency numbers don't support it. We'd regress p99 by about 40ms and the SLA is 100ms."},
+    {"author": "Ben", "text": "I strongly disagree with shipping this in the current form. Can we get one more week to de-risk the migration?"},
+    {"author": "Cara", "text": "As I mentioned earlier, here's the design doc link in case it's useful for the latency question."},
+    {"author": "Devi", "text": "As I already said, this is basic stuff — read the runbook."},
+    {"author": "Ed", "text": "Oh sure, because rewriting the whole service over a weekend always goes great."},
+    {"author": "Ana", "text": "You're right Ben, I hadn't fully weighed the migration risk — good catch, let's scope the extra week."},
+    {"author": "Cara", "text": "What would change your mind, Devi? I want to make sure I'm not missing context you have."},
+    {"author": "Devi", "text": "Fine, whatever the team wants."},
+    {"author": "Ben", "text": "Deploy is green on staging, moving on to the next item."}
+  ]
+}
