@@ -1,0 +1,15 @@
+{
+  "channel": "#eng-standup",
+  "messages": [
+    {"author": "Dana", "text": "I already explained this last week. It's obviously a config issue, not a code one."},
+    {"author": "Sam", "text": "Good point Dana — building on that, could we also check whether the cache is stale?"},
+    {"author": "Priya", "text": "That won't work for the EU region though, because the config there is read-only at runtime."},
+    {"author": "Marcus", "text": "Not my job to fix the deploy pipeline, you'll have to file a ticket with platform."},
+    {"author": "Lena", "text": "What does everyone think — should we roll back first and debug after?"},
+    {"author": "Dana", "text": "Anyone who's worked here long enough knows we never roll back on a Friday."},
+    {"author": "Sam", "text": "Fair. Lena raised a good option though — want me to draft the rollback plan so we have it ready?"},
+    {"author": "Priya", "text": "Here's how we can unblock Marcus: I can grant temporary platform access so he doesn't wait on a ticket."},
+    {"author": "Marcus", "text": "That's a naive take, Priya — access isn't the bottleneck, the approval chain is."},
+    {"author": "Lena", "text": "Thanks Priya, that's the idea I was missing. Let's go with your access approach."}
+  ]
+}

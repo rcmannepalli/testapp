@@ -1,0 +1,8 @@
+{
+  "channel": "#design-review",
+  "messages": [
+    {"author": "Alex", "text": "As I already said in the doc, the modal flow is wrong. Read it before commenting."},
+    {"author": "Jordan", "text": "I did read it — I think the modal works, but could you say more about the case you're worried about?"},
+    {"author": "Alex", "text": "Here's the case: on mobile the modal traps focus. Good question, that's the crux."}
+  ]
+}
