@@ -1,24 +1,34 @@
-# README
+# SugApp
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+**A respect & listening culture-coaching platform for the enterprise.**
 
-Things you may want to cover:
+SugApp helps organizations build a culture of **respect and listening** across the
+*entire* workforce — not just leaders, not just sales — by measuring and coaching the
+everyday communication behaviors that make people feel **heard** or feel **small**.
 
-* Ruby version
+## What it does
 
-* System dependencies
+- Coaches **everyone**, including tenured ICs who drift bureaucratic and dismissive over time.
+- Provides an **integrated** view across communication channels (Slack → Teams + Outlook → meetings).
+- Measures **observable respect behaviors** — not traits or emotions — each with the evidence
+  quote and a coaching rewrite, rolling up to a team-level **Respect Index**.
 
-* Configuration
+Built privacy-first: opt-in, personal-mirror-first, aggregate-only for the org, and designed
+to comply with workplace privacy law and the EU AI Act.
 
-* Database creation
+## Status
 
-* Database initialization
+Early stage. The product strategy, scoring model, privacy/legal architecture, and phased
+plan live in the design doc:
 
-* How to run the test suite
+📄 **[docs/PRODUCT.md](docs/PRODUCT.md)**
 
-* Services (job queues, cache servers, search engines, etc.)
+## Roadmap (high level)
 
-* Deployment instructions
+1. **Phase 1 — MVP:** Slack connector → Claude-based Respect & Listening scorer → personal
+   mirror + anonymized team Respect Index.
+2. **Phase 2 — Integrated:** add Microsoft Teams + Outlook (Graph API) into one cross-channel profile.
+3. **Phase 3 — Meetings:** consent-gated meeting transcripts for airtime/interruption signals.
 
-* ...
+See [docs/PRODUCT.md](docs/PRODUCT.md) for the full thesis, market positioning, differentiation,
+behavior model, and guardrails.
