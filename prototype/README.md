@@ -15,10 +15,13 @@ thin, dependency-free plumbing around it, all Python-stdlib only:
 - **Personal mirror** — a one-person HTML dashboard, generated as a standalone file
   (`mirror.py`).
 - **Ingest** a Slack *export* into the transcript format (`ingest_slack.py`).
+- **Consent gate** — opt-in registry enforced in code; only opted-in people are
+  scored or stored (`consent.py`, `score.py --require-consent`).
 
-Still deliberately **not** here: a live Slack/Teams API connector, a web server, and
-the consent/opt-in layer — those are production Phase-1 work (and the consent layer is
-mandatory before any real data flows; see design doc §5).
+Still deliberately **not** here: a live Slack/Teams API connector and a web server —
+those are production Phase-1 work. The consent *mechanism* now exists (opt-in gate +
+penalty-free, data-purging opt-out); the production version still needs an
+authenticated consent UX and the regional config from design doc §5.
 
 ## What it does
 
@@ -188,9 +191,34 @@ individual can be identified from it. This is the §5 privacy boundary made lite
 the same database powers both the name-attached personal mirror and this fully
 anonymized org view. Generated `team_dashboard.html` is git-ignored.
 
+## Consent (opt-in, with a penalty-free opt-out)
+
+PRODUCT.md §5 makes consent non-negotiable: scoring is **opt-in**, and only people
+who have opted in may be scored or stored. `consent.py` manages the registry;
+`score.py --require-consent` enforces it — non-consented people's messages are
+dropped *before* anything is sent to the model, so their text is never scored,
+stored, or even transmitted.
+
+```bash
+python consent.py --in Dana Sam Priya      # opt people in
+python consent.py --list                   # everyone's status (+ audit)
+python consent.py --status Marcus          # one person
+python consent.py --out Dana               # withdraw: purges Dana's stored data too
+
+# Only opted-in authors are scored/stored:
+python score.py --demo --save --require-consent sample_transcripts/standup.json
+```
+
+Opting out is **penalty-free and retroactive**: it records the withdrawal and deletes
+everything already stored about that person (findings + goal). Absence of a decision
+is never treated as consent. Consent lives in the same SQLite database (`consent`
+table) so the gate and the data are colocated.
+
 ## What this is NOT
 
 - Not production code (no retries/backoff hardening, no rate-limit queue; persistence
   is a local SQLite file, not a real datastore).
-- Not the consent/opt-in layer — that's mandatory before any real data flows (design doc §5).
+- The consent *gate* exists, but not the full §5 consent system — no authenticated
+  identity (an "author" is a trusted string), no consent UI, no regional/works-council
+  config, no enforced data-retention/minimization windows.
 - Not a verdict engine — it surfaces evidence + a suggested rewrite for a human to reflect on.

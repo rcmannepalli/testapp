@@ -50,6 +50,15 @@ CREATE TABLE IF NOT EXISTS goals (
     goal    TEXT NOT NULL,
     set_at  TEXT NOT NULL   -- ISO-8601 UTC
 );
+
+-- Opt-in consent registry (PRODUCT.md §5: opt-in with a real, penalty-free
+-- opt-out). Absence of a row means NOT consented — scoring is opt-in, so silence
+-- is never consent. status 'out' records an explicit withdrawal.
+CREATE TABLE IF NOT EXISTS consent (
+    author     TEXT PRIMARY KEY,
+    status     TEXT NOT NULL CHECK (status IN ('in', 'out')),
+    updated_at TEXT NOT NULL   -- ISO-8601 UTC
+);
 """
 
 
@@ -217,3 +226,75 @@ def get_goal(conn: sqlite3.Connection, author: str) -> dict | None:
         "SELECT goal, set_at FROM goals WHERE author = ?", (author,)
     ).fetchone()
     return dict(row) if row else None
+
+
+# --- Consent (PRODUCT.md §5: opt-in, with a real, penalty-free opt-out) -------
+# Scoring is opt-in: only authors with status 'in' may be scored or stored.
+# Withdrawing (opt-out) is penalty-free and also purges what was already stored.
+
+
+def set_consent(conn: sqlite3.Connection, author: str, status: str) -> None:
+    """Record an author's consent decision ('in' or 'out')."""
+    if status not in ("in", "out"):
+        raise ValueError("status must be 'in' or 'out'")
+    updated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with conn:
+        conn.execute(
+            "INSERT INTO consent (author, status, updated_at) VALUES (?, ?, ?) "
+            "ON CONFLICT(author) DO UPDATE SET status = excluded.status, "
+            "updated_at = excluded.updated_at",
+            (author, status, updated_at),
+        )
+
+
+def get_consent(conn: sqlite3.Connection, author: str) -> str | None:
+    """'in', 'out', or None if the author has never made a decision."""
+    row = conn.execute(
+        "SELECT status FROM consent WHERE author = ?", (author,)
+    ).fetchone()
+    return row["status"] if row else None
+
+
+def consented_authors(conn: sqlite3.Connection) -> set:
+    """The set of authors who have opted in — the only people who may be scored."""
+    rows = conn.execute("SELECT author FROM consent WHERE status = 'in'").fetchall()
+    return {row["author"] for row in rows}
+
+
+def consent_list(conn: sqlite3.Connection) -> list[dict]:
+    """All recorded consent decisions, opted-in first then by name."""
+    rows = conn.execute(
+        "SELECT author, status, updated_at FROM consent "
+        "ORDER BY status, author"
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def purge_person(conn: sqlite3.Connection, author: str) -> int:
+    """Delete everything stored about one person (findings + goal).
+
+    Used when consent is withdrawn — the opt-out is not just "stop going
+    forward" but also removes what was already collected. Returns the number of
+    findings deleted. The consent row itself is left to the caller to set to
+    'out' so the withdrawal is recorded.
+    """
+    with conn:
+        cur = conn.execute("DELETE FROM findings WHERE author = ?", (author,))
+        deleted = cur.rowcount
+        conn.execute("DELETE FROM goals WHERE author = ?", (author,))
+    return deleted
+
+
+def unconsented_with_data(conn: sqlite3.Connection) -> list[str]:
+    """Authors who have stored findings but are not opted in — a consent audit.
+
+    Should be empty once the consent gate is in use; non-empty means data was
+    stored before consent enforcement (e.g. demo data).
+    """
+    rows = conn.execute(
+        "SELECT DISTINCT f.author FROM findings f "
+        "LEFT JOIN consent c ON c.author = f.author "
+        "WHERE c.status IS NULL OR c.status = 'out' "
+        "ORDER BY f.author"
+    ).fetchall()
+    return [row["author"] for row in rows]

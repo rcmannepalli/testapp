@@ -7,6 +7,7 @@ Usage:
     python score.py --demo sample_transcripts/standup.json   # offline, no key
     python score.py --save sample_transcripts/standup.json    # persist to SQLite
     python score.py --save --db mine.db transcript.json       # custom db path
+    python score.py --save --require-consent transcript.json  # only opted-in people
 
 Reads a transcript JSON ({"channel": str, "messages": [{"author", "text"}, ...]}),
 scores it against the Respect & Listening rubric using Claude, and prints per-message
@@ -15,6 +16,10 @@ findings (with evidence + coaching rewrites) plus a k-anonymized team Respect In
 With --save, the run and its findings are written to a SQLite database (default
 sugapp.db next to this script; override with --db) so trends accumulate over time.
 Read them back with trends.py.
+
+With --require-consent, only authors who have opted in (see consent.py) are scored
+or stored — non-consented people's messages are dropped before anything is sent to
+the model. This is the PRODUCT.md §5 opt-in gate; turn it on for any real data.
 """
 import json
 import os
@@ -113,10 +118,32 @@ def render(transcript: dict, findings: list[dict]) -> None:
     print()
 
 
+def apply_consent(transcript: dict, findings: list[dict] | None, consented: set):
+    """Drop everything about non-consented authors (PRODUCT.md §5).
+
+    Keeps only messages whose author has opted in, reindexing message_index to
+    the filtered list. When `findings` is given (demo mode), filters and
+    reindexes them too; when it's None (live mode), the transcript is filtered
+    *before* scoring so non-consented text is never sent to the API.
+    """
+    kept = [(i, m) for i, m in enumerate(transcript["messages"])
+            if m.get("author", "unknown") in consented]
+    remap = {old: new for new, (old, _) in enumerate(kept)}
+    transcript = {**transcript, "messages": [m for _, m in kept]}
+    if findings is not None:
+        findings = [
+            {**f, "message_index": remap[f["message_index"]]}
+            for f in findings
+            if f.get("author") in consented and f.get("message_index") in remap
+        ]
+    return transcript, findings
+
+
 def main() -> None:
     args = sys.argv[1:]
     demo = "--demo" in args
     save = "--save" in args
+    require_consent = "--require-consent" in args
 
     # --db takes a value; pull it (and its value) out before reading positionals.
     db_path = None
@@ -132,6 +159,27 @@ def main() -> None:
         sys.exit(__doc__)
     transcript = load_transcript(paths[0])
 
+    # Consent gate (PRODUCT.md §5): only opted-in authors may be scored or stored.
+    consented = None
+    if require_consent:
+        import store
+
+        cconn = store.connect(db_path) if db_path else store.connect()
+        consented = store.consented_authors(cconn)
+        cconn.close()
+        present = {m.get("author", "unknown") for m in transcript["messages"]}
+        if not (present & consented):
+            opted = ", ".join(sorted(consented)) or "(no one yet)"
+            sys.exit(
+                "--require-consent: no opted-in participants in this transcript.\n"
+                f"  in transcript: {', '.join(sorted(present))}\n"
+                f"  opted in:      {opted}\n"
+                "  Opt people in first:  python consent.py --in <name>"
+            )
+        if not demo:
+            # Filter BEFORE scoring so non-consented text never reaches the API.
+            transcript, _ = apply_consent(transcript, None, consented)
+
     if demo:
         # Offline mode: render a bundled fixture of expected model output so the
         # pipeline (evidence, rewrites, Respect Index, k-anonymity) can be seen
@@ -140,6 +188,8 @@ def main() -> None:
         if not os.path.exists(fixture):
             sys.exit(f"--demo needs a fixture next to the transcript: {fixture}")
         findings = json.load(open(fixture, encoding="utf-8"))["findings"]
+        if consented is not None:
+            transcript, findings = apply_consent(transcript, findings, consented)
     else:
         import anthropic  # only needed for a live scoring run
 
