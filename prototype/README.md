@@ -5,10 +5,20 @@ messages for **observable respect & listening behaviors** — never traits or em
 and rolling them up into a team **Respect Index**.
 
 This is the hardest, most novel piece of the product (see [`../docs/PRODUCT.md`](../docs/PRODUCT.md)
-§4 "The Respect & Listening model"). It deliberately has **no Slack connector, no UI, and no
-database** — you feed it sample transcripts (JSON) and it prints per-message scores with
-evidence + coaching rewrites, plus a team-level Respect Index. The goal is to prove the
-model works before building any plumbing.
+§4 "The Respect & Listening model"). It started as just the scorer; it now also has
+thin, dependency-free plumbing around it, all Python-stdlib only:
+
+- **Score** a transcript → per-message findings with evidence + coaching rewrites + a
+  team Respect Index (`score.py`).
+- **Persist** runs to a local SQLite database so trends accumulate (`score.py --save`,
+  read back with `trends.py`).
+- **Personal mirror** — a one-person HTML dashboard, generated as a standalone file
+  (`mirror.py`).
+- **Ingest** a Slack *export* into the transcript format (`ingest_slack.py`).
+
+Still deliberately **not** here: a live Slack/Teams API connector, a web server, and
+the consent/opt-in layer — those are production Phase-1 work (and the consent layer is
+mandatory before any real data flows; see design doc §5).
 
 ## What it does
 
@@ -89,6 +99,31 @@ A JSON object with a `channel` label and a list of `messages`:
 
 Author names are pseudonyms in the samples; in the real product the personal mirror is the
 only place a name is ever attached to a score (the org sees aggregates only).
+
+### Ingesting from a Slack export
+
+Hand-writing that JSON is fine for testing, but `ingest_slack.py` produces it from a
+real **Slack workspace export** (Settings → Import/Export Data → Export) — no OAuth, no
+API token, no live access. It resolves user IDs to names, turns Slack markup into plain
+text (`<@U123>` → `@Dana`, `<url|label>` → label, `&amp;` → `&`), and drops
+non-conversational events (joins, bot messages, topic changes).
+
+```bash
+# An export root has users.json + one folder per channel. Pick a channel:
+python ingest_slack.py sample_slack_export --channel eng-standup
+
+# Pipe straight into the scorer (live run needs ANTHROPIC_API_KEY):
+python ingest_slack.py sample_slack_export --channel eng-standup | python score.py -
+
+# Or save the transcript, then score + persist it:
+python ingest_slack.py sample_slack_export --channel eng-standup -o eng.json
+python score.py --save eng.json
+```
+
+A single channel folder or one day's `.json` file also work (pass `--users users.json`
+if it's not alongside). `sample_slack_export/` is a tiny example you can run as-is. The
+**live** Slack API connector and the consent/opt-in gate it requires are deliberately
+out of scope here (design doc §5, §8).
 
 ## Persistence & trends
 

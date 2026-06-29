@@ -1,0 +1,7 @@
+[
+  {"id": "U01DANA",  "name": "dana",       "real_name": "Dana Ng",    "profile": {"display_name": "Dana"}},
+  {"id": "U02SAM",   "name": "sam",        "real_name": "Sam Ruiz",   "profile": {"display_name": "Sam"}},
+  {"id": "U03PRIYA", "name": "priya",      "real_name": "Priya Shah", "profile": {"display_name": ""}},
+  {"id": "U04MARC",  "name": "marcus",     "real_name": "Marcus Lee", "profile": {"display_name": "Marcus"}},
+  {"id": "U05BOT",   "name": "standupbot", "real_name": "Standup Bot","profile": {"display_name": "Standup Bot"}, "is_bot": true}
+]
