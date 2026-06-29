@@ -36,3 +36,4 @@ __pycache__/
 *.pyc
 *.db
 mirror_*.html
+team_dashboard.html

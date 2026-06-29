@@ -167,8 +167,26 @@ python mirror.py Dana --db team.db --out dana.html
 ```
 
 This view is **name-attached on purpose** — it's for the person only. The org never
-sees it; team reporting stays anonymized (`trends.py`). Generated `mirror_*.html`
-files are git-ignored.
+sees it; team reporting stays anonymized (`trends.py`, `dashboard.py`). Generated
+`mirror_*.html` files are git-ignored.
+
+## Team dashboard (the "org sees aggregates only" view)
+
+`dashboard.py` is the org-view counterpart to the personal mirror — the visual
+version of `trends.py`. It writes a self-contained `team_dashboard.html`: the
+headline **Respect Index**, its **trend over time**, and the **behavior mix** — and
+by construction **never a name or a quote**. Runs with fewer than `K_ANON`
+participants are suppressed (shown as "suppressed", excluded from the headline).
+
+```bash
+python dashboard.py                       # default sugapp.db → team_dashboard.html
+python dashboard.py --db team.db --out team.html
+```
+
+It reads only run-level tallies and behavior counts (never per-person data), so no
+individual can be identified from it. This is the §5 privacy boundary made literal:
+the same database powers both the name-attached personal mirror and this fully
+anonymized org view. Generated `team_dashboard.html` is git-ignored.
 
 ## What this is NOT
 
