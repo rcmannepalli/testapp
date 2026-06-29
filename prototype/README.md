@@ -90,8 +90,35 @@ A JSON object with a `channel` label and a list of `messages`:
 Author names are pseudonyms in the samples; in the real product the personal mirror is the
 only place a name is ever attached to a score (the org sees aggregates only).
 
+## Persistence & trends
+
+The scorer is stateless by default — it scores and prints. Add `--save` to also
+write the run and its findings to a local SQLite database (Python stdlib, no extra
+dependency), so trends accumulate over time. This is the data layer the dashboards
+in [`../docs/PRODUCT.md`](../docs/PRODUCT.md) §8 will read from.
+
+```bash
+# Score and persist (works with --demo too, so no key needed to try it):
+python score.py --demo --save sample_transcripts/standup.json
+python score.py --save my_transcript.json            # live run, default sugapp.db
+python score.py --save --db team.db my_transcript.json   # custom database path
+
+# Read the accumulated history back:
+python trends.py                 # default sugapp.db
+python trends.py --db team.db
+```
+
+`trends.py` prints three views: the **Respect Index per run over time** (team rollup,
+with the same k-anonymity suppression as the live report — runs with fewer than
+`K_ANON` participants are never given a number), each person's lifetime
+**personal-mirror** tally, and **behavior frequency** across all runs.
+
+The database (`*.db`) is git-ignored — it holds scored content, so it never gets
+committed. Schema lives in `store.py` (two tables: `runs`, `findings`).
+
 ## What this is NOT
 
-- Not production code (no retries/backoff hardening, no rate-limit queue, no persistence).
+- Not production code (no retries/backoff hardening, no rate-limit queue; persistence
+  is a local SQLite file, not a real datastore).
 - Not the consent/opt-in layer — that's mandatory before any real data flows (design doc §5).
 - Not a verdict engine — it surfaces evidence + a suggested rewrite for a human to reflect on.

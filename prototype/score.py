@@ -4,10 +4,17 @@
 Usage:
     python score.py sample_transcripts/standup.json
     cat transcript.json | python score.py -
+    python score.py --demo sample_transcripts/standup.json   # offline, no key
+    python score.py --save sample_transcripts/standup.json    # persist to SQLite
+    python score.py --save --db mine.db transcript.json       # custom db path
 
 Reads a transcript JSON ({"channel": str, "messages": [{"author", "text"}, ...]}),
 scores it against the Respect & Listening rubric using Claude, and prints per-message
 findings (with evidence + coaching rewrites) plus a k-anonymized team Respect Index.
+
+With --save, the run and its findings are written to a SQLite database (default
+sugapp.db next to this script; override with --db) so trends accumulate over time.
+Read them back with trends.py.
 """
 import json
 import os
@@ -109,6 +116,17 @@ def render(transcript: dict, findings: list[dict]) -> None:
 def main() -> None:
     args = sys.argv[1:]
     demo = "--demo" in args
+    save = "--save" in args
+
+    # --db takes a value; pull it (and its value) out before reading positionals.
+    db_path = None
+    if "--db" in args:
+        i = args.index("--db")
+        if i + 1 >= len(args):
+            sys.exit("--db needs a path, e.g. --db sugapp.db")
+        db_path = args[i + 1]
+        args = args[:i] + args[i + 2 :]
+
     paths = [a for a in args if not a.startswith("--")]
     if len(paths) != 1:
         sys.exit(__doc__)
@@ -128,6 +146,22 @@ def main() -> None:
         findings = score_transcript(anthropic.Anthropic(), transcript)
 
     render(transcript, findings)
+
+    if save:
+        import store
+
+        conn = store.connect(db_path) if db_path else store.connect()
+        participants = len({m.get("author", "unknown") for m in transcript["messages"]})
+        run_id = store.save_run(
+            conn,
+            channel=transcript.get("channel", "unknown"),
+            source=paths[0],
+            participant_count=participants,
+            findings=findings,
+        )
+        conn.close()
+        print(f"  saved run #{run_id} ({len(findings)} findings) → "
+              f"{db_path or store.DEFAULT_DB}\n")
 
 
 if __name__ == "__main__":
