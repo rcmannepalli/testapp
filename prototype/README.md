@@ -114,7 +114,26 @@ with the same k-anonymity suppression as the live report — runs with fewer tha
 **personal-mirror** tally, and **behavior frequency** across all runs.
 
 The database (`*.db`) is git-ignored — it holds scored content, so it never gets
-committed. Schema lives in `store.py` (two tables: `runs`, `findings`).
+committed. Schema lives in `store.py` (three tables: `runs`, `findings`, `goals`).
+
+## Personal mirror (the "person sees their own data first" view)
+
+`mirror.py` turns the stored history for **one person** into a self-contained HTML
+dashboard — their own quotes, what's landing well vs. worth a second look, a trend
+over time, and one self-set goal. It's the §5 personal mirror and the §6
+reflect → choose loop. No web framework, no server: it writes a single `.html` file
+(inline CSS, no JavaScript) you open in a browser.
+
+```bash
+python mirror.py --list                 # who's in the database
+python mirror.py Dana                    # → mirror_Dana.html
+python mirror.py Dana --set-goal "Ask one genuine question before pushing back"
+python mirror.py Dana --db team.db --out dana.html
+```
+
+This view is **name-attached on purpose** — it's for the person only. The org never
+sees it; team reporting stays anonymized (`trends.py`). Generated `mirror_*.html`
+files are git-ignored.
 
 ## What this is NOT
 

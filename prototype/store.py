@@ -42,6 +42,14 @@ CREATE TABLE IF NOT EXISTS findings (
 );
 CREATE INDEX IF NOT EXISTS idx_findings_run    ON findings(run_id);
 CREATE INDEX IF NOT EXISTS idx_findings_author ON findings(author);
+
+-- One self-set goal per person (PRODUCT.md §6: "the person picks one thing to
+-- improve"). Keyed by author so setting a goal replaces the prior one.
+CREATE TABLE IF NOT EXISTS goals (
+    author  TEXT PRIMARY KEY,
+    goal    TEXT NOT NULL,
+    set_at  TEXT NOT NULL   -- ISO-8601 UTC
+);
 """
 
 
@@ -143,3 +151,69 @@ def behavior_counts(conn: sqlite3.Connection) -> list[dict]:
         """
     ).fetchall()
     return [dict(row) for row in rows]
+
+
+# --- Per-person read side: the personal mirror (PRODUCT.md §5) ----------------
+# The mirror is the one place a name attaches to a score. The org never sees this.
+
+
+def people(conn: sqlite3.Connection) -> list[str]:
+    """Distinct authors who have at least one finding."""
+    rows = conn.execute(
+        "SELECT DISTINCT author FROM findings ORDER BY author"
+    ).fetchall()
+    return [row["author"] for row in rows]
+
+
+def person_findings(conn: sqlite3.Connection, author: str) -> list[dict]:
+    """Every finding for one person, newest run first — their quotes + rewrites."""
+    rows = conn.execute(
+        """
+        SELECT f.behavior, f.polarity, f.evidence, f.coaching_rewrite,
+               f.rationale, r.channel, r.created_at
+        FROM findings f
+        JOIN runs r ON r.id = f.run_id
+        WHERE f.author = ?
+        ORDER BY r.created_at DESC, f.id DESC
+        """,
+        (author,),
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def person_timeline(conn: sqlite3.Connection, author: str) -> list[dict]:
+    """Per-run respectful/disrespectful tally for one person — their trend line."""
+    rows = conn.execute(
+        """
+        SELECT r.id, r.created_at, r.channel,
+               SUM(f.polarity = 'respectful')    AS respectful,
+               SUM(f.polarity = 'disrespectful') AS disrespectful
+        FROM findings f
+        JOIN runs r ON r.id = f.run_id
+        WHERE f.author = ?
+        GROUP BY r.id
+        ORDER BY r.created_at, r.id
+        """,
+        (author,),
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def set_goal(conn: sqlite3.Connection, author: str, goal: str) -> None:
+    """Set (replacing any prior) this person's one self-chosen improvement goal."""
+    set_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with conn:
+        conn.execute(
+            "INSERT INTO goals (author, goal, set_at) VALUES (?, ?, ?) "
+            "ON CONFLICT(author) DO UPDATE SET goal = excluded.goal, "
+            "set_at = excluded.set_at",
+            (author, goal, set_at),
+        )
+
+
+def get_goal(conn: sqlite3.Connection, author: str) -> dict | None:
+    """This person's current goal, or None if they haven't set one."""
+    row = conn.execute(
+        "SELECT goal, set_at FROM goals WHERE author = ?", (author,)
+    ).fetchone()
+    return dict(row) if row else None
