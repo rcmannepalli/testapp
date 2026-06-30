@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "messages": [
+    {"type": "message", "user": "U02SAM", "text": "Docs are here if useful: <https://wiki.example.com/cache|the cache runbook>.", "ts": "1718700600.000800"},
+    {"type": "message", "user": "U05BOT", "subtype": "bot_message", "bot_id": "B05", "text": "Reminder: <!here> please post your updates.", "ts": "1718700500.000700"},
+    {"type": "message", "user": "U04MARC", "text": "Not my job to fix the deploy pipeline, you'll have to file a ticket with <#C09PLAT|platform>.", "ts": "1718700400.000600"},
+    {"type": "message", "user": "U03PRIYA", "text": "That won't work for the EU region though &lt;see the runbook&gt; — the config there is read-only at runtime.", "ts": "1718700300.000500"},
+    {"type": "message", "user": "U02SAM", "text": "Good point <@U01DANA> — building on that, could we check the cache &amp; the stale entries?", "ts": "1718700200.000400", "thread_ts": "1718700100.000300"},
+    {"type": "message", "user": "U01DANA", "text": "I already explained this last week. It's obviously a config issue, not a code one.", "ts": "1718700100.000300"},
+    {"type": "message", "subtype": "bot_message", "bot_id": "B05", "username": "Standup Bot", "text": "Daily standup thread is open.", "ts": "1718700001.000200"},
+    {"type": "message", "subtype": "channel_join", "user": "U02SAM", "text": "<@U02SAM> has joined the channel", "ts": "1718700000.000100"}
+  ],
+  "has_more": false,
+  "response_metadata": {"next_cursor": ""}
+}

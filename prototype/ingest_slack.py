@@ -42,17 +42,26 @@ _SPECIAL = re.compile(r"<!(\w+)(?:\|[^>]+)?>")              # <!here>, <!channel
 _LINK = re.compile(r"<(https?://[^>|]+)(?:\|([^>]+))?>")    # <url> or <url|label>
 
 
-def load_users(path: str) -> dict:
-    """Map Slack user id → best available display name."""
-    with open(path, encoding="utf-8") as fh:
-        users = json.load(fh)
+def names_from_users(members: list) -> dict:
+    """Map Slack user id → best available display name.
+
+    Takes the parsed list of user objects — the same shape whether it came from
+    an export's users.json (a bare array) or the Web API's users.list
+    (`response["members"]`), so connect_slack.py reuses this verbatim.
+    """
     names = {}
-    for u in users:
+    for u in members:
         profile = u.get("profile") or {}
         name = (profile.get("display_name") or u.get("real_name")
                 or u.get("name") or u["id"])
         names[u["id"]] = name
     return names
+
+
+def load_users(path: str) -> dict:
+    """Map Slack user id → display name, read from an export's users.json."""
+    with open(path, encoding="utf-8") as fh:
+        return names_from_users(json.load(fh))
 
 
 def clean_text(text: str, names: dict) -> str:

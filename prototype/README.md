@@ -124,9 +124,39 @@ python score.py --save eng.json
 ```
 
 A single channel folder or one day's `.json` file also work (pass `--users users.json`
-if it's not alongside). `sample_slack_export/` is a tiny example you can run as-is. The
-**live** Slack API connector and the consent/opt-in gate it requires are deliberately
-out of scope here (design doc §5, §8).
+if it's not alongside). `sample_slack_export/` is a tiny example you can run as-is.
+
+### Pulling live from Slack (the API connector)
+
+`connect_slack.py` reads a channel from the live **Slack Web API** and emits the same
+transcript format — stdlib `urllib` only, no SDK. Output is byte-identical to the
+export path (it reuses the same name/markup logic).
+
+**You don't need a paid plan or the full OAuth web flow.** For your own workspace,
+Slack's "Install to Workspace" button *is* the OAuth step — it hands you a bot token:
+
+1. Create a free Slack workspace.
+2. **api.slack.com/apps** → Create New App → From scratch.
+3. OAuth & Permissions → Bot Token Scopes: `channels:history`, `channels:read`,
+   `users:read` (+ `groups:*` for private channels).
+4. **Install to Workspace** → copy the bot token (`xoxb-…`).
+5. Invite the app to the channel: `/invite @your-app`.
+6. `export SLACK_TOKEN=xoxb-...`
+
+```bash
+# Try it with NO workspace at all — reads bundled API-response fixtures:
+python connect_slack.py --channel eng-standup --mock sample_slack_api
+
+# Live, once you have a token:
+export SLACK_TOKEN=xoxb-...
+python connect_slack.py --channel eng-standup
+python connect_slack.py --channel eng-standup | python score.py --require-consent -
+```
+
+The full **3-legged OAuth** (client_id/secret + a public redirect URL) is only needed
+to let *other* organizations install your app — defer it until you go multi-tenant.
+**Teams/Outlook** is a separate connector (Microsoft Graph + a free M365 dev tenant);
+that's Phase 2 in [`../docs/PRODUCT.md`](../docs/PRODUCT.md) §8.
 
 ## Persistence & trends
 
