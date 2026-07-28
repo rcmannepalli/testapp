@@ -37,3 +37,8 @@ __pycache__/
 *.db
 mirror_*.html
 team_dashboard.html
+
+# SugApp UI generated/demo artifacts
+prototype/ui/demo.db
+prototype/ui/*.db
+prototype/**/__pycache__/
