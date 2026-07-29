@@ -264,30 +264,42 @@ marked **unverified** (id falls back to the name) — the report says so. Run th
 `connect_slack.py` for verified ids. `consent.py --import <transcript>` registers the
 id↔name map so you can then opt people in by name.
 
-### Consent UI (the browser front-end)
+### Consent UI (the browser front-end, with Sign in with Slack)
 
-`consent_server.py` is a tiny web app (stdlib `http.server`, no framework) — the
-browser companion to `consent.py`. A person opens the page, sees their own status
-and **exactly what is stored about them** (informed consent), and can opt in or opt
-out; opt-out deletes their stored data. It writes through the same id-keyed store, so
-the CLI and UI are one source of truth.
+`consent_server.py` is a tiny web app (stdlib `http.server` + `urllib`, no framework)
+— the browser companion to `consent.py`. A person **signs in with Slack**, sees their
+own status and **exactly what is stored about them** (informed consent), and can opt
+in or opt out; opt-out deletes their stored data. It writes through the same id-keyed
+store, so the CLI and UI are one source of truth.
+
+**Authentication is real SSO** — "Sign in with Slack" (OpenID Connect on OAuth 2.0):
+`/login` → Slack → `/oauth/callback` exchanges the code server-to-server and calls
+Slack's userInfo endpoint (all JSON over TLS — no JWT/crypto dependency). The
+**verified Slack user id it returns is the `author_id`** the registry keys on, so a
+person can only ever see and act on their own record. Opt-in/opt-out act on the
+**session** identity, ignoring anything the page submits — tamper-proof by design.
 
 ```bash
-python consent.py --import eng.json          # so there are identities to show
-python consent_server.py --db sugapp.db      # → http://127.0.0.1:8000
+# Reuse your Slack app; add user scopes openid,email,profile + register the redirect.
+export SLACK_CLIENT_ID=...           # api.slack.com/apps → Basic Information
+export SLACK_CLIENT_SECRET=...
+python consent_server.py --db sugapp.db          # → http://127.0.0.1:8000
+
+# Offline / no Slack app — roster picker stands in for sign-in:
+python consent.py --import eng.json
+python consent_server.py --dev --db sugapp.db
 ```
 
-Identity here is picked from a roster, standing in for single-sign-on; the server
-**rejects any id it doesn't know** (HTTP 400). In production the page sits behind
-Slack sign-in so a person can only ever see and act on their own record.
+Full 3-legged OAuth needs a registered redirect URL (use ngrok if not on
+`localhost`). Without credentials the server auto-falls back to `--dev` roster mode.
 
 ## What this is NOT
 
 - Not production code (no retries/backoff hardening, no rate-limit queue; persistence
   is a local SQLite file, not a real datastore).
-- The consent *gate* and **authenticated identity** (id-keyed, via Slack user ids)
-  exist, but not the full §5 consent system — no consent UI, no regional/works-council
-  config, no enforced data-retention/minimization windows. Identity is only as strong
-  as the token used: a valid Slack token vouches for the ids, but there's no
-  end-user auth of your own.
+- The consent *gate*, **authenticated identity** (id-keyed via Slack user ids), a
+  consent UI, and **end-user SSO** (Sign in with Slack / OIDC) all exist — but not yet
+  the rest of the §5 system: no enterprise IdP SSO (SAML/OIDC via Okta/Entra), no
+  regional/works-council config, no enforced data-retention/minimization windows, and
+  sessions are in-memory (a real deploy needs a signed-cookie / shared session store).
 - Not a verdict engine — it surfaces evidence + a suggested rewrite for a human to reflect on.
