@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Turn a Slack export into a transcript score.py can read.
 
 This is the Phase-1 "Slack connector" (PRODUCT.md §8) in its lowest-risk form:

@@ -1,3 +1,5 @@
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """The Respect & Listening rubric — the product's core IP, in one place.
 
 Every behavior here is an OBSERVABLE communication act, not an inferred trait or

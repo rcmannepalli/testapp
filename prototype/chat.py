@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Interactive REPL for the Respect & Listening scorer.
 
 Type a message and press Enter; it's scored on its own against the rubric and the

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Manage opt-in consent — the gate that must exist before any real data flows.
 
 PRODUCT.md §5 makes this non-negotiable: scoring is **opt-in**, with a real,

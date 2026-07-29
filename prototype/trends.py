@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Read back the persisted Respect & Listening history.
 
 Once you've scored a few transcripts with `score.py --save`, this prints what

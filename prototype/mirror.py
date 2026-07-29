@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Personal mirror — a one-person dashboard generated as a standalone HTML file.
 
 This is the "person sees their own data first and most" surface from

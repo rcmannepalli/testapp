@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Team Respect Index dashboard — the org-view counterpart to the personal mirror.
 
 This is the "org sees aggregates only" surface from PRODUCT.md §5: the headline
