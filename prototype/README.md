@@ -264,6 +264,23 @@ marked **unverified** (id falls back to the name) — the report says so. Run th
 `connect_slack.py` for verified ids. `consent.py --import <transcript>` registers the
 id↔name map so you can then opt people in by name.
 
+### Consent UI (the browser front-end)
+
+`consent_server.py` is a tiny web app (stdlib `http.server`, no framework) — the
+browser companion to `consent.py`. A person opens the page, sees their own status
+and **exactly what is stored about them** (informed consent), and can opt in or opt
+out; opt-out deletes their stored data. It writes through the same id-keyed store, so
+the CLI and UI are one source of truth.
+
+```bash
+python consent.py --import eng.json          # so there are identities to show
+python consent_server.py --db sugapp.db      # → http://127.0.0.1:8000
+```
+
+Identity here is picked from a roster, standing in for single-sign-on; the server
+**rejects any id it doesn't know** (HTTP 400). In production the page sits behind
+Slack sign-in so a person can only ever see and act on their own record.
+
 ## What this is NOT
 
 - Not production code (no retries/backoff hardening, no rate-limit queue; persistence
