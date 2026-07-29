@@ -37,7 +37,40 @@ def load_transcript(path: str) -> dict:
     data = json.loads(raw)
     if "messages" not in data:
         raise ValueError("transcript must have a 'messages' list")
+    normalize_identities(data)
     return data
+
+
+def normalize_identities(transcript: dict) -> None:
+    """Ensure every message has both a display `author` and a stable `author_id`.
+
+    Authenticated sources (the Slack connector) supply `author_id`; a
+    hand-written transcript without one falls back to author_id == the display
+    name — an "unverified" identity that still runs, but can be spoofed.
+    """
+    for m in transcript["messages"]:
+        name = m.get("author", "unknown")
+        m["author"] = name
+        m["verified"] = "author_id" in m and m["author_id"] not in (None, "")
+        m["author_id"] = m["author_id"] if m.get("verified") else name
+
+
+def identity_map(transcript: dict) -> dict:
+    """author_id → display name for every participant in the transcript."""
+    return {m["author_id"]: m["author"] for m in transcript["messages"]}
+
+
+def attach_identity(transcript: dict, findings: list[dict]) -> None:
+    """Stamp each finding with the authoritative author_id + name of its message.
+
+    Identity comes from the (authenticated) transcript, never from the model —
+    the scorer decides *what* a message shows, not *who* said it.
+    """
+    messages = transcript["messages"]
+    for f in findings:
+        m = messages[f["message_index"]]
+        f["author"] = m["author"]
+        f["author_id"] = m["author_id"]
 
 
 def score_transcript(client, transcript: dict) -> list[dict]:
@@ -105,8 +138,13 @@ def render(transcript: dict, findings: list[dict]) -> None:
         print(f"  {person}: {c['respectful']} respectful, {c['disrespectful']} disrespectful")
 
     # Team rollup (the "org sees aggregates only" view) — k-anonymity enforced.
-    participants = {m.get("author", "unknown") for m in messages}
+    # Count distinct identities (author_id), so two people sharing a display name
+    # can't be collapsed into one and slip under the k-anonymity threshold.
+    participants = {m["author_id"] for m in messages}
     print("\n--- Team rollup (org view) ---")
+    if any(not m.get("verified", False) for m in messages):
+        print("  (note: some identities are unverified — this transcript had no "
+              "authenticated author_id; run via connect_slack.py for verified ids)")
     if len(participants) < K_ANON:
         print(f"  Respect Index suppressed: only {len(participants)} participants "
               f"(k-anonymity threshold is {K_ANON}).")
@@ -127,14 +165,16 @@ def apply_consent(transcript: dict, findings: list[dict] | None, consented: set)
     *before* scoring so non-consented text is never sent to the API.
     """
     kept = [(i, m) for i, m in enumerate(transcript["messages"])
-            if m.get("author", "unknown") in consented]
+            if m["author_id"] in consented]
     remap = {old: new for new, (old, _) in enumerate(kept)}
     transcript = {**transcript, "messages": [m for _, m in kept]}
     if findings is not None:
+        # A finding survives iff its message survived — identity is decided by the
+        # message's author_id, not by anything on the finding.
         findings = [
             {**f, "message_index": remap[f["message_index"]]}
             for f in findings
-            if f.get("author") in consented and f.get("message_index") in remap
+            if f.get("message_index") in remap
         ]
     return transcript, findings
 
@@ -166,16 +206,19 @@ def main() -> None:
 
         cconn = store.connect(db_path) if db_path else store.connect()
         consented = store.consented_authors(cconn)
-        cconn.close()
-        present = {m.get("author", "unknown") for m in transcript["messages"]}
+        present = {m["author_id"] for m in transcript["messages"]}
         if not (present & consented):
-            opted = ", ".join(sorted(consented)) or "(no one yet)"
+            names = ", ".join(sorted(m["author"] for m in transcript["messages"]))
+            opted = ", ".join(sorted(store.display_name(cconn, a) for a in consented)) \
+                or "(no one yet)"
+            cconn.close()
             sys.exit(
                 "--require-consent: no opted-in participants in this transcript.\n"
-                f"  in transcript: {', '.join(sorted(present))}\n"
+                f"  in transcript: {names}\n"
                 f"  opted in:      {opted}\n"
-                "  Opt people in first:  python consent.py --in <name>"
+                "  Opt people in first:  python consent.py --in <name-or-id>"
             )
+        cconn.close()
         if not demo:
             # Filter BEFORE scoring so non-consented text never reaches the API.
             transcript, _ = apply_consent(transcript, None, consented)
@@ -195,19 +238,23 @@ def main() -> None:
 
         findings = score_transcript(anthropic.Anthropic(), transcript)
 
+    # Identity is authoritative from the transcript, not the model.
+    attach_identity(transcript, findings)
+
     render(transcript, findings)
 
     if save:
         import store
 
         conn = store.connect(db_path) if db_path else store.connect()
-        participants = len({m.get("author", "unknown") for m in transcript["messages"]})
+        participants = len({m["author_id"] for m in transcript["messages"]})
         run_id = store.save_run(
             conn,
             channel=transcript.get("channel", "unknown"),
             source=paths[0],
             participant_count=participants,
             findings=findings,
+            identities=identity_map(transcript),
         )
         conn.close()
         print(f"  saved run #{run_id} ({len(findings)} findings) → "

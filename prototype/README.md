@@ -230,7 +230,8 @@ dropped *before* anything is sent to the model, so their text is never scored,
 stored, or even transmitted.
 
 ```bash
-python consent.py --in Dana Sam Priya      # opt people in
+python consent.py --import eng.json        # learn who's in a channel (id ↔ name)
+python consent.py --in Dana Sam Priya      # opt people in (by name or id)
 python consent.py --list                   # everyone's status (+ audit)
 python consent.py --status Marcus          # one person
 python consent.py --out Dana               # withdraw: purges Dana's stored data too
@@ -241,14 +242,35 @@ python score.py --demo --save --require-consent sample_transcripts/standup.json
 
 Opting out is **penalty-free and retroactive**: it records the withdrawal and deletes
 everything already stored about that person (findings + goal). Absence of a decision
-is never treated as consent. Consent lives in the same SQLite database (`consent`
-table) so the gate and the data are colocated.
+is never treated as consent. Consent lives in the same SQLite database so the gate
+and the data are colocated.
+
+### Authenticated identity (why consent is reliable)
+
+Consent, scores, and goals are keyed by a stable **`author_id`** — the Slack user id
+(`U02SAM`) the connector carries through from the authenticated API — **not** a
+display name. A name can be changed or shared; an id can't. This is what makes the
+guarantees hold:
+
+- **No impersonation** — identity comes from the authenticated transcript, never
+  from the model or a typed name.
+- **Reliable opt-out** — withdrawal purges by id, so two people who happen to share a
+  display name are never collapsed (the code enforces this).
+- **Typo-safe** — opting someone in by a name that matches nobody is refused with the
+  known roster, instead of silently protecting the wrong id.
+
+Hand-written transcripts with no `author_id` still run, but their identities are
+marked **unverified** (id falls back to the name) — the report says so. Run through
+`connect_slack.py` for verified ids. `consent.py --import <transcript>` registers the
+id↔name map so you can then opt people in by name.
 
 ## What this is NOT
 
 - Not production code (no retries/backoff hardening, no rate-limit queue; persistence
   is a local SQLite file, not a real datastore).
-- The consent *gate* exists, but not the full §5 consent system — no authenticated
-  identity (an "author" is a trusted string), no consent UI, no regional/works-council
-  config, no enforced data-retention/minimization windows.
+- The consent *gate* and **authenticated identity** (id-keyed, via Slack user ids)
+  exist, but not the full §5 consent system — no consent UI, no regional/works-council
+  config, no enforced data-retention/minimization windows. Identity is only as strong
+  as the token used: a valid Slack token vouches for the ids, but there's no
+  end-user auth of your own.
 - Not a verdict engine — it surfaces evidence + a suggested rewrite for a human to reflect on.

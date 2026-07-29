@@ -132,10 +132,12 @@ def build(db_path):
         "tiles": tiles, "balance": balance, "teams": teams,
     }
 
-    # --- People (personal mirror)
+    # --- People (personal mirror). Keyed by the stable author_id; display by name.
     people = []
-    for name in store.people(conn):
-        timeline = store.person_timeline(conn, name)
+    for person in store.people(conn):
+        author_id = person["author_id"]
+        name = person["display_name"]
+        timeline = store.person_timeline(conn, author_id)
         if not timeline:
             continue
         last = timeline[-1]
@@ -146,7 +148,7 @@ def build(db_path):
         moments = []
         for f in conn.execute(
             "SELECT behavior, polarity, evidence, coaching_rewrite, rationale "
-            "FROM findings WHERE run_id=? AND author=? ORDER BY id", (latest_run_id, name)
+            "FROM findings WHERE run_id=? AND author_id=? ORDER BY id", (latest_run_id, author_id)
         ):
             pcounts[f["behavior"]] += 1
             m = {"b": LABEL.get(f["behavior"], f["behavior"]),
@@ -155,7 +157,7 @@ def build(db_path):
             if f["polarity"] == "disrespectful" and f["coaching_rewrite"]:
                 m["rw"] = f["coaching_rewrite"]
             moments.append(m)
-        goal = store.get_goal(conn, name)
+        goal = store.get_goal(conn, author_id)
         ch = last["channel"]
         rough = pcounts["dismissiveness"] + pcounts["personal_attack"] + pcounts["gatekeeping"]
         people.append({

@@ -258,28 +258,34 @@ def main() -> None:
     conn = store.connect(db_path)
 
     if "--list" in args:
-        names = store.people(conn)
-        print("People in the database:" if names else "No people scored yet.")
-        for n in names:
-            print(f"  {n}")
+        ppl = store.people(conn)
+        print("People in the database:" if ppl else "No people scored yet.")
+        for p in ppl:
+            print(f"  {p['display_name']}  ({p['author_id']})")
         conn.close()
         return
 
     positionals = [a for a in args if not a.startswith("--")]
     if len(positionals) != 1:
         sys.exit(__doc__)
-    author = positionals[0]
+    # Accept a display name or an author_id; the mirror is keyed by the stable id.
+    try:
+        author_id = store.resolve_author(conn, positionals[0])
+    except ValueError as e:
+        conn.close()
+        sys.exit(str(e))
+    author = store.display_name(conn, author_id)
 
     if set_goal_text is not None:
-        store.set_goal(conn, author, set_goal_text)
+        store.set_goal(conn, author_id, set_goal_text)
         print(f"  goal set for {author}: “{set_goal_text}”")
 
-    findings = store.person_findings(conn, author)
+    findings = store.person_findings(conn, author_id)
     if not findings and set_goal_text is None:
-        known = ", ".join(store.people(conn)) or "(none yet)"
-        sys.exit(f"no findings for '{author}'. People in the database: {known}")
-    timeline = store.person_timeline(conn, author)
-    goal = store.get_goal(conn, author)
+        known = ", ".join(p["display_name"] for p in store.people(conn)) or "(none yet)"
+        sys.exit(f"no findings for '{positionals[0]}'. People in the database: {known}")
+    timeline = store.person_timeline(conn, author_id)
+    goal = store.get_goal(conn, author_id)
     conn.close()
 
     out_path = out_path or f"mirror_{author}.html"

@@ -57,7 +57,7 @@ def main() -> None:
     # mirror is the one place a name attaches to a score).
     print("\n--- Per-person (personal-mirror view, all runs) ---")
     for p in store.person_totals(conn):
-        print(f"  {p['author']}: {p['respectful']} respectful, "
+        print(f"  {p['display_name']}: {p['respectful']} respectful, "
               f"{p['disrespectful']} disrespectful")
 
     # Which behaviors fire most — the rubric's signal mix in practice.

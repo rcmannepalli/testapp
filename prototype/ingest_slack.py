@@ -115,8 +115,15 @@ def transcript_from(messages: list[dict], names: dict, channel_label: str) -> di
     for m in messages:
         if not is_human_message(m):
             continue
-        author = names.get(m["user"], m["user"])
-        out_msgs.append({"author": author, "text": clean_text(m["text"], names)})
+        user_id = m["user"]
+        author = names.get(user_id, user_id)
+        # Carry the stable Slack user id as author_id — the authenticated identity
+        # consent and scores key on. The display name can change; the id can't.
+        out_msgs.append({
+            "author": author,
+            "author_id": user_id,
+            "text": clean_text(m["text"], names),
+        })
     label = channel_label if channel_label.startswith("#") else f"#{channel_label}"
     return {"channel": label, "messages": out_msgs}
 

@@ -39,11 +39,14 @@ def insert_run(conn, created_at, channel, source, participant_count, findings):
             (created_at, channel, source, participant_count),
         )
         rid = cur.lastrowid
+        # Demo identities are unverified: author_id == the display name. Register
+        # them so name-resolution and the identities join behave like real data.
+        store.register_identities(conn, {f["author"]: f["author"] for f in findings})
         conn.executemany(
-            "INSERT INTO findings (run_id, message_index, author, behavior, polarity, "
-            "evidence, coaching_rewrite, rationale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO findings (run_id, message_index, author_id, author, behavior, "
+            "polarity, evidence, coaching_rewrite, rationale) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
-                (rid, f.get("message_index", 0), f["author"], f["behavior"],
+                (rid, f.get("message_index", 0), f["author"], f["author"], f["behavior"],
                  f["polarity"], f["evidence"], f.get("coaching_rewrite", ""),
                  f["rationale"])
                 for f in findings
