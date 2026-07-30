@@ -257,11 +257,43 @@ const stx = 8.2, stw = W - MX - stx;
 });
 
 // ===================== 11 · BUSINESS MODEL =====================
-threeCards("10 · Business model", "Per-seat SaaS, priced to the value of retention.", null, [
-  { h: "Recurring", b: "Per-active-participant monthly subscription; annual contracts at the org tier." },
-  { h: "Expansion built in", b: "Land one team, expand by channel and headcount — net revenue retention is the growth engine." },
-  { h: "Defensible margin", b: "Cost scales with scored volume, not seats; the taxonomy and trust posture are the durable moat." },
-]);
+s = p.addSlide(); bg(s, PAPER);
+eyebrow(s, "10 · Business model");
+title(s, "Per-seat SaaS — and every employee is a seat.", false, 0.92, 30);
+s.addText([
+  { text: "A mirror for ", options: {} },
+  { text: "everyone", options: { italic: true } },
+  { text: ", not a dashboard for a few managers — whole-company adoption, priced per seat. The cost to serve stays tiny because it scales with ", options: {} },
+  { text: "message volume, not headcount", options: { bold: true } },
+  { text: ".", options: {} },
+], { x: MX, y: 1.72, w: CW, h: 0.75, fontFace: SANS, fontSize: 14.5, color: INKSOFT, lineSpacingMultiple: 1.1 });
+const bmCards = [
+  ["Recurring", "Per-active-participant monthly subscription; annual contracts at the org tier."],
+  ["Every seat, margin-accretive", "Universal adoption, not power-users; each new seat adds far more revenue than cost."],
+  ["Defensible margin", "Cost scales with scored volume; the taxonomy and trust posture are the durable moat."],
+];
+const bmcw = (CW - 0.8) / 3, bmy = 2.65, bmh = 1.5;
+bmCards.forEach(([h, b], i) => {
+  const x = MX + i * (bmcw + 0.4);
+  card(s, x, bmy, bmcw, bmh, CARD);
+  s.addText(h, { x: x + 0.28, y: bmy + 0.2, w: bmcw - 0.56, h: 0.55, fontFace: SANS, bold: true, fontSize: 15, color: INKSOFT, lineSpacingMultiple: 0.95 });
+  s.addText(b, { x: x + 0.28, y: bmy + 0.75, w: bmcw - 0.56, h: 0.65, fontFace: SANS, fontSize: 12.5, color: MUTED, lineSpacingMultiple: 1.03 });
+});
+const stats = [
+  ["≈ $0.30", "per opted-in employee / month to serve on Sonnet (~$0.10 on Haiku).", 34],
+  ["~90%+", "modeled gross margin at an illustrative $4 / seat / month.", 34],
+  ["Volume-based", "cost tracks messages, not seats — so it holds at 50 or 50,000 people.", 22],
+];
+const sy = 4.4, sh = 1.5;
+stats.forEach(([n, lab, fs], i) => {
+  const x = MX + i * (bmcw + 0.4);
+  card(s, x, sy, bmcw, sh, PAPER);
+  s.addText(n, { x: x + 0.28, y: sy + 0.2, w: bmcw - 0.56, h: 0.55, fontFace: SERIF, bold: true, fontSize: fs, color: JADE });
+  s.addText(lab, { x: x + 0.28, y: sy + 0.8, w: bmcw - 0.56, h: 0.6, fontFace: SANS, fontSize: 12, color: MUTED, lineSpacingMultiple: 1.03 });
+});
+s.addText("Modeled from LLM token costs at ~75% opt-in (250-person example ≈ $35–70/mo to serve). Message volume is the main driver; $4/seat is illustrative — replace with your numbers before presenting.", {
+  x: MX, y: 6.15, w: CW, h: 0.6, fontFace: SANS, italic: true, fontSize: 11.5, color: MUTED, lineSpacingMultiple: 1.05,
+});
 
 // ===================== 12 · STATUS =====================
 s = p.addSlide(); bg(s, PAPER);
