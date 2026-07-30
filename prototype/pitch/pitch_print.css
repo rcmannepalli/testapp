@@ -22,5 +22,5 @@ section.hero h1{font-size:40px!important}
 ul.clean li{margin:5px 0!important}
 /* suppress the trailing footer (would create a blank page); restamp on the cover */
 .foot{display:none!important}
-section.hero::after{content:"Confidential & Proprietary   ·   Prepared for LaunchUNC   ·   \00A9 2026 Suguna Mannepalli";
+section.hero::after{content:"Confidential & Proprietary   ·   Prepared for Launch Chapel Hill   ·   \00A9 2026 Suguna Mannepalli";
   position:absolute;left:68px;bottom:30px;font-family:system-ui,sans-serif;font-size:12px;color:#7E958F;letter-spacing:.02em;}

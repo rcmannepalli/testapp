@@ -66,7 +66,7 @@ s.addText("RESPECT INDEX", { x: 9.0, y: 3.92, w: 3.7, h: 0.3, align: "center", f
 s.addText("A single, trending, team-level score — the highest-respect number, not the highest-sentiment one.", {
   x: 8.85, y: 5.55, w: 4.0, h: 0.9, align: "center", fontFace: SANS, italic: true, fontSize: 11.5, color: "9DB4AE",
 });
-s.addText("SugApp (working name)  ·  Confidential & Proprietary  ·  Prepared for LaunchUNC", {
+s.addText("SugApp (working name)  ·  Confidential & Proprietary  ·  Prepared for Launch Chapel Hill", {
   x: MX, y: 6.95, w: CW, h: 0.3, fontFace: SANS, fontSize: 10.5, color: "7E958F",
 });
 
@@ -329,7 +329,7 @@ s.addText("Next: design partners for a live pilot, and calibration of the Index 
 // ===================== 13 · THE ASK (dark close) =====================
 s = p.addSlide(); bg(s, INK);
 eyebrow(s, "12 · The ask", true);
-title(s, "What we want from LaunchUNC.", true, 0.95, 34);
+title(s, "What we want from Launch Chapel Hill.", true, 0.95, 34);
 const acw = 5.85, ach = 2.0, ay = 2.35;
 [["Design partners", "Warm intros to 3–5 teams (10–40 people) going through change, willing to run a consented 6-week pilot and co-develop the Index.", MX],
  ["Pre-seed & mentorship", "Runway to calibrate the model and land the first paying pilots, plus go-to-market and enterprise-privacy guidance.", W - MX - acw]].forEach(([h, b, x]) => {
