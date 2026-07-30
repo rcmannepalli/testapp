@@ -326,9 +326,57 @@ s.addText("Next: design partners for a live pilot, and calibration of the Index 
   x: MX, y: 6.35, w: CW, h: 0.6, fontFace: SANS, italic: true, fontSize: 13, color: MUTED,
 });
 
-// ===================== 13 · THE ASK (dark close) =====================
+// ===================== 12 · VALIDATION / DISCOVERY =====================
+s = p.addSlide(); bg(s, PAPER);
+eyebrow(s, "12 · Validation");
+title(s, "The pain is real — and people told us so.");
+s.addText("In discovery conversations with leaders and individual contributors alike, two themes surfaced again and again: people don’t feel heard, and they’ve never had a structured way to reflect on their own behavior. The published research says the same at scale.", {
+  x: MX, y: 1.9, w: CW, h: 0.9, fontFace: SANS, fontSize: 15, color: INKSOFT, lineSpacingMultiple: 1.12,
+});
+const vstats = [
+  ["74%", "are more effective at their job when they feel heard.", "UKG Workforce Institute"],
+  ["10–15%", "of people are truly self-aware — though 95% think they are.", "T. Eurich, Harvard Business Review"],
+  ["4.6×", "more likely to do their best work when they feel their voice is heard.", "Salesforce Research"],
+];
+const vcw = (CW - 2 * 0.4) / 3, vy = 3.15, vh = 2.7;
+vstats.forEach((it, i) => {
+  const x = MX + i * (vcw + 0.4);
+  card(s, x, vy, vcw, vh, CARD);
+  s.addText(it[0], { x: x + 0.3, y: vy + 0.32, w: vcw - 0.6, h: 0.8, fontFace: SERIF, bold: true, fontSize: 40, color: JADE });
+  s.addText(it[1], { x: x + 0.3, y: vy + 1.25, w: vcw - 0.6, h: 1.0, fontFace: SANS, fontSize: 13, color: INKSOFT, lineSpacingMultiple: 1.08 });
+  s.addText(it[2], { x: x + 0.3, y: vy + 2.28, w: vcw - 0.6, h: 0.3, fontFace: SANS, italic: true, fontSize: 10.5, color: MUTED });
+});
+s.addText("The market feels unheard and can’t see itself — exactly the gap SugApp is built for. Our own conversations confirm the demand.", {
+  x: MX, y: 6.1, w: CW, h: 0.5, fontFace: SANS, italic: true, fontSize: 13, color: MUTED,
+});
+
+// ===================== 13 · FOUNDER =====================
+s = p.addSlide(); bg(s, PAPER);
+eyebrow(s, "13 · Founder");
+title(s, "Built from twenty years inside the problem.");
+s.addText([
+  { text: "Suguna Mannepalli", options: { bold: true, color: INKSOFT } },
+  { text: " — 20+ years leading teams in corporate IT, and an accredited leadership coach (Association for Coaching). SugApp comes from both chairs: the operator who watched culture break, and the coach who helps people change.", options: { color: INKSOFT } },
+], { x: MX, y: 1.95, w: CW, h: 0.9, fontFace: SANS, fontSize: 15, lineSpacingMultiple: 1.12 });
+const fdw = 5.85, fdh = 2.5, fdy = 3.2;
+card(s, MX, fdy, fdw, fdh, CARD);
+s.addText("What I kept seeing", { x: MX + 0.35, y: fdy + 0.28, w: fdw - 0.7, h: 0.4, fontFace: SANS, bold: true, fontSize: 16, color: CRIT });
+s.addText("The loudest voice gets mistaken for the most knowledgeable. Hierarchy quietly overrides better judgment. People in power rarely get to see their own behavior — while the teams beneath them are scrutinized for echoing it.", { x: MX + 0.35, y: fdy + 0.85, w: fdw - 0.7, h: 1.5, fontFace: SANS, fontSize: 13.5, color: INKSOFT, lineSpacingMultiple: 1.08 });
+const fdx2 = W - MX - fdw;
+card(s, fdx2, fdy, fdw, fdh, PAPER);
+s.addText("What actually changes people", { x: fdx2 + 0.35, y: fdy + 0.28, w: fdw - 0.7, h: 0.4, fontFace: SANS, bold: true, fontSize: 16, color: JADE });
+s.addText([
+  { text: "Told to change, people get defensive. ", options: {} },
+  { text: "Heard", options: { bold: true } },
+  { text: ", and given room to reflect, they improve on their own — and outperform. The lost skill of our moment isn’t communication — it’s listening.", options: {} },
+], { x: fdx2 + 0.35, y: fdy + 0.85, w: fdw - 0.7, h: 1.5, fontFace: SANS, fontSize: 13.5, color: INKSOFT, lineSpacingMultiple: 1.08 });
+s.addText("SugApp productizes that coaching truth: a private mirror for self-reflection, never a manager’s verdict.", {
+  x: MX, y: 6.0, w: CW, h: 0.6, fontFace: SERIF, italic: true, fontSize: 16, color: INKSOFT,
+});
+
+// ===================== 14 · THE ASK (dark close) =====================
 s = p.addSlide(); bg(s, INK);
-eyebrow(s, "12 · The ask", true);
+eyebrow(s, "14 · The ask", true);
 title(s, "What we want from Launch Chapel Hill.", true, 0.95, 34);
 const acw = 5.85, ach = 2.0, ay = 2.35;
 [["Design partners", "Warm intros to 3–5 teams (10–40 people) going through change, willing to run a consented 6-week pilot and co-develop the Index.", MX],

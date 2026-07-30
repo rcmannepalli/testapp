@@ -13,8 +13,8 @@ only ever "a proprietary, validated behavioral taxonomy," never the rubric itsel
 | `build_pptx.js` | Generates the editable PowerPoint from that content (`pptxgenjs`). |
 | `pitch_print.css` | Print overrides that turn the web deck into one 16:9 page per slide. |
 | `build_pdf.sh` | Renders `pitch_deck.html` → slide-per-page PDF via headless Chromium. |
-| `SugApp_Investor_Brief.pptx` | Built output — editable in PowerPoint / Google Slides (13 slides). |
-| `SugApp_Investor_Brief.pdf` | Built output — ready-to-share PDF (13 pages, 16:9). |
+| `SugApp_Investor_Brief.pptx` | Built output — editable in PowerPoint / Google Slides (15 slides). |
+| `SugApp_Investor_Brief.pdf` | Built output — ready-to-share PDF (15 pages, 16:9). |
 
 ## Regenerate
 
@@ -39,9 +39,10 @@ For an exact match, export the PDF straight from PowerPoint (option a).
 - Fill in the **pricing / ask numbers** on the Business model and Ask slides (placeholders).
 - "SugApp" is a working codename — swap for the real (trademark-cleared) name when chosen.
 
-## Deck outline (13 slides)
+## Deck outline (15 slides)
 
 Cover · 01 Problem · 02 Broken incumbent (surveys) · 03 The moment (change / AI) ·
 04 Why now · 05 What it is · 06 How culture shifts (self-reflection) ·
 07 Self-managing teams · 08 Why we win (trust) · 09 Market & buyer ·
-10 Business model · 11 Status · 12 The ask.
+10 Business model · 11 Status · 12 Validation (discovery + cited stats) ·
+13 Founder · 14 The ask.
