@@ -1,0 +1,26 @@
+/* Print overrides: turn the scrolling web deck into one 16:9 page per slide.
+   Appended to a copy of pitch_deck.html by build_pdf.sh before rendering. */
+.confbar{display:none!important}
+@page{size:1280px 720px;margin:0}
+html,body{background:#fff!important}
+:root{--bg:#ffffff!important}
+.deck{max-width:none!important;margin:0!important;padding:0!important}
+section{width:1280px;height:720px;box-sizing:border-box;padding:44px 68px!important;
+  border-bottom:none!important;break-after:page;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center}
+section:last-child{break-after:auto}
+/* cover keeps its two-column hero; shrink the gauge so it fits one page */
+section.hero{display:grid!important;grid-template-columns:1.1fr .9fr!important;
+  align-items:center!important;gap:34px!important;padding-top:44px!important;position:relative!important}
+section.hero h1{font-size:40px!important}
+.gauge{width:240px!important;margin:0 auto!important}
+.gwrap .cap{margin-top:10px!important;font-size:12px!important}
+/* "what it is" mock/list tightened to fit one page */
+.mock{padding:16px 18px!important}
+.spark{height:32px!important}
+.mock .row{margin-bottom:8px!important}
+ul.clean li{margin:5px 0!important}
+/* suppress the trailing footer (would create a blank page); restamp on the cover */
+.foot{display:none!important}
+section.hero::after{content:"Confidential & Proprietary   ·   Prepared for LaunchUNC   ·   \00A9 2026 <Your Legal Name>";
+  position:absolute;left:68px;bottom:30px;font-family:system-ui,sans-serif;font-size:12px;color:#7E958F;letter-spacing:.02em;}
