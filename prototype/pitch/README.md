@@ -35,7 +35,7 @@ For an exact match, export the PDF straight from PowerPoint (option a).
 
 ## Before presenting
 
-- Replace **`<Your Legal Name>`** (cover + close) with your legal name.
+- Name is set to **Suguna Mannepalli** (cover byline + copyright).
 - Fill in the **pricing / ask numbers** on the Business model and Ask slides (placeholders).
 - "SugApp" is a working codename — swap for the real (trademark-cleared) name when chosen.
 

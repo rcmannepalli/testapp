@@ -51,6 +51,9 @@ s.addText([
 s.addText("●  Working prototype built", {
   x: MX, y: 5.75, w: 4.5, h: 0.4, fontFace: SANS, bold: true, fontSize: 13, color: JADE,
 });
+s.addText("Prepared by Suguna Mannepalli", {
+  x: MX, y: 6.25, w: 6.0, h: 0.35, fontFace: SANS, fontSize: 13.5, bold: true, color: PAPER,
+});
 // gauge (doughnut) right
 s.addChart(p.ChartType.doughnut, [{ name: "idx", labels: ["Respect", "rest"], values: [78, 22] }], {
   x: 9.0, y: 1.7, w: 3.7, h: 3.7, holeSize: 74, showLegend: false, showTitle: false,
@@ -339,7 +342,7 @@ s.addText([
   { text: "Respect is the leading indicator of whether they can", options: { color: JADE, bold: true } },
   { text: " — and no one else is measuring it.", options: { color: PAPER } },
 ], { x: MX, y: 4.9, w: CW, h: 1.3, fontFace: SERIF, fontSize: 23, lineSpacingMultiple: 1.1 });
-s.addText("SugApp (working name)  ·  © 2026 <Your Legal Name>. All rights reserved.  ·  Confidential & Proprietary — contains trade-secret methodology.", {
+s.addText("SugApp (working name)  ·  © 2026 Suguna Mannepalli. All rights reserved.  ·  Confidential & Proprietary — contains trade-secret methodology.", {
   x: MX, y: 6.9, w: CW, h: 0.3, fontFace: SANS, fontSize: 10, color: "7E958F",
 });
 
