@@ -200,6 +200,25 @@ with the same k-anonymity suppression as the live report — runs with fewer tha
 `K_ANON` participants are never given a number), each person's lifetime
 **personal-mirror** tally, and **behavior frequency** across all runs.
 
+### Momentum (is it getting better?)
+
+`trends.py` shows the accumulated totals; `momentum.py` shows the **direction** —
+it buckets the history into day/week/month periods and reports each period's Respect
+Index with the change from the period before it (the "up 23 points this month"
+signal the behavior-change loop is built on, PRODUCT.md §6):
+
+```bash
+python momentum.py                       # month buckets
+python momentum.py --period week
+python momentum.py --channel '#eng-standup'
+```
+
+Same privacy split as everything else: **channel momentum** is the org view
+(k-anonymity enforced — a channel-period below `K_ANON` is suppressed), and
+**personal momentum** is the name-attached personal mirror. The period rollups are
+`store.channel_momentum` / `store.person_momentum`; the ratio + delta math is in
+`momentum.py`, so the SQL stays plain aggregation.
+
 The database (`*.db`) is git-ignored — it holds scored content, so it never gets
 committed. Schema lives in `store.py` (three tables: `runs`, `findings`, `goals`).
 

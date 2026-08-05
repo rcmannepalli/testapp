@@ -281,6 +281,78 @@ def behavior_counts(conn: sqlite3.Connection) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+# --- Momentum: the same tallies, bucketed by time period ----------------------
+# The behavior-change loop (PRODUCT.md §6) needs "is this getting better?", which
+# means comparing periods. These queries bucket runs into day/week/month and roll
+# up respectful/disrespectful per bucket; the ratio + period-over-period delta are
+# computed by the caller (analytics.py), keeping the SQL to plain aggregation.
+#
+# created_at is ISO-8601 UTC; substr(...,1,19) trims the timezone offset to
+# 'YYYY-MM-DDTHH:MM:SS' so strftime parses it on every SQLite version. The prefix
+# is fixed-width and lexicographically ordered, so bucketing stays correct.
+_PERIOD_FMT = {"day": "%Y-%m-%d", "week": "%Y-W%W", "month": "%Y-%m"}
+
+
+def _period_expr(period: str) -> str:
+    try:
+        fmt = _PERIOD_FMT[period]
+    except KeyError:
+        raise ValueError(f"period must be one of {', '.join(_PERIOD_FMT)}; got {period!r}")
+    return f"strftime('{fmt}', substr(r.created_at, 1, 19))"
+
+
+def channel_momentum(conn: sqlite3.Connection, period: str = "month") -> list[dict]:
+    """Per (channel, period): tallies + max participant count, oldest period first.
+
+    `max_participants` is the largest single-run participant count in the bucket —
+    a conservative proxy for k-anonymity suppression at the period level (the set
+    of *all* participants across a period isn't stored; participant_count is
+    per-run). The caller suppresses a channel-period whose max is below K_ANON.
+    """
+    period_expr = _period_expr(period)
+    rows = conn.execute(
+        f"""
+        SELECT
+            r.channel                                       AS channel,
+            {period_expr}                                   AS period,
+            COALESCE(SUM(f.polarity = 'respectful'), 0)     AS respectful,
+            COALESCE(SUM(f.polarity = 'disrespectful'), 0)  AS disrespectful,
+            MAX(r.participant_count)                        AS max_participants,
+            COUNT(DISTINCT r.id)                            AS runs
+        FROM runs r
+        LEFT JOIN findings f ON f.run_id = r.id
+        GROUP BY channel, period
+        ORDER BY channel, period
+        """
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def person_momentum(conn: sqlite3.Connection, period: str = "month") -> list[dict]:
+    """Per (person, period): respectful/disrespectful tallies, oldest period first.
+
+    This is the personal-mirror trend (name-attached on purpose — the person's own
+    data, never an org-facing per-individual rollup). No k-anonymity applies.
+    """
+    period_expr = _period_expr(period)
+    rows = conn.execute(
+        f"""
+        SELECT
+            f.author_id                              AS author_id,
+            COALESCE(i.display_name, MAX(f.author))  AS display_name,
+            {period_expr}                            AS period,
+            SUM(f.polarity = 'respectful')           AS respectful,
+            SUM(f.polarity = 'disrespectful')        AS disrespectful
+        FROM findings f
+        JOIN runs r ON r.id = f.run_id
+        LEFT JOIN identities i ON i.author_id = f.author_id
+        GROUP BY f.author_id, period
+        ORDER BY display_name, period
+        """
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
 # --- Per-person read side: the personal mirror (PRODUCT.md §5) ----------------
 # The mirror is the one place a name attaches to a score. The org never sees this.
 
