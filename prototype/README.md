@@ -219,6 +219,38 @@ Same privacy split as everything else: **channel momentum** is the org view
 `store.channel_momentum` / `store.person_momentum`; the ratio + delta math is in
 `momentum.py`, so the SQL stays plain aggregation.
 
+### Named signals (`signals.py`)
+
+Raw behavior counts become the plain-English metrics PRODUCT.md §4 describes.
+Each **signal** is a balance between a respectful form and its disrespectful
+counterpart, so it answers a question as a percentage — "when people disagree,
+how often is it the idea that's challenged, not the person?"
+
+```bash
+python signals.py                 # org-wide + every person
+python signals.py Dana            # one person's signals
+```
+
+The signal model (which behaviors compose each signal) lives in `rubric.py`
+(`SIGNALS`), next to the behaviors it's built from. Org-wide is the aggregate
+(k-anonymity enforced); per-person is the personal mirror. Signals without a
+disrespectful counterpart (e.g. credit & attribution) are reported as a presence
+count, never as an accusation.
+
+### Behavior fingerprints (`fingerprint.py`)
+
+The personal mirror's totals say "4 respectful, 2 disrespectful"; a fingerprint
+says *which* behaviors — the distribution across the named behaviors, sorted by
+frequency, each with a representative quote from that person's own messages.
+
+```bash
+python fingerprint.py             # every person
+python fingerprint.py Priya       # one person
+```
+
+Evidence, not a verdict — always the exact quote (PRODUCT.md §4), name-attached
+because it's the personal-mirror surface the org never sees (PRODUCT.md §5).
+
 The database (`*.db`) is git-ignored — it holds scored content, so it never gets
 committed. Schema lives in `store.py` (three tables: `runs`, `findings`, `goals`).
 

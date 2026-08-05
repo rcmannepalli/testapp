@@ -61,6 +61,49 @@ RESPECTFUL = {b for b, v in BEHAVIORS.items() if v["polarity"] == "respectful"}
 DISRESPECTFUL = {b for b, v in BEHAVIORS.items() if v["polarity"] == "disrespectful"}
 
 
+# Named signals (PRODUCT.md §4) — the plain-English metrics an enterprise reads,
+# built from the observable behaviors above. Each signal is a *balance* between a
+# respectful form and its disrespectful counterpart: the value is
+# positive / (positive + contrast), so it answers a real question ("when people
+# disagree, how often do they attack the idea instead of the person?") rather than
+# dumping raw counts. A signal with no `contrast` is a *presence* signal — reported
+# as an occurrence count, never as an accusation (the legal framing of "credit").
+# A behavior may inform more than one signal; these are distinct lenses, not a
+# partition.
+SIGNALS = [
+    {
+        "name": "Disagreeing with dignity",
+        "question": "When pushing back, is it the idea that's challenged, or the person?",
+        "positive": {"disagree_with_dignity"},
+        "contrast": {"dismissiveness", "personal_attack"},
+    },
+    {
+        "name": "Enabling over gatekeeping",
+        "question": "When process or territory comes up, do people unblock or block?",
+        "positive": {"enabling"},
+        "contrast": {"gatekeeping"},
+    },
+    {
+        "name": "Listening over dismissing",
+        "question": "Do people build on what others said, or minimize it?",
+        "positive": {"acknowledgment", "question_asking", "invites_others"},
+        "contrast": {"dismissiveness"},
+    },
+    {
+        "name": "Credit & attribution",
+        "question": "Is whose idea it was acknowledged? (presence — never an accusation)",
+        "positive": {"credit_attribution"},
+        "contrast": set(),
+    },
+]
+
+# Fail loudly if a signal ever references a behavior that isn't in the rubric —
+# the two must not drift apart.
+for _sig in SIGNALS:
+    for _b in _sig["positive"] | _sig["contrast"]:
+        assert _b in BEHAVIORS, f"signal {_sig['name']!r} references unknown behavior {_b!r}"
+
+
 def system_prompt() -> str:
     lines = [
         "You are SugApp's Respect & Listening scorer. You analyze workplace chat messages "

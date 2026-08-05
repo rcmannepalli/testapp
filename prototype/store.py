@@ -268,6 +268,44 @@ def person_totals(conn: sqlite3.Connection) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def behavior_tally(conn: sqlite3.Connection, author_id: str | None = None,
+                   channel: str | None = None) -> dict:
+    """behavior → count, optionally scoped to one person and/or one channel.
+
+    The building block for named signal ratios and per-person fingerprints: a
+    plain map so callers combine behaviors however a signal or fingerprint needs.
+    """
+    where, params = [], []
+    if author_id is not None:
+        where.append("f.author_id = ?")
+        params.append(author_id)
+    if channel is not None:
+        where.append("r.channel = ?")
+        params.append(channel)
+    clause = ("WHERE " + " AND ".join(where)) if where else ""
+    rows = conn.execute(
+        f"""
+        SELECT f.behavior AS behavior, COUNT(*) AS n
+        FROM findings f
+        JOIN runs r ON r.id = f.run_id
+        {clause}
+        GROUP BY f.behavior
+        """,
+        params,
+    ).fetchall()
+    return {row["behavior"]: row["n"] for row in rows}
+
+
+def distinct_finding_authors(conn: sqlite3.Connection) -> int:
+    """How many distinct people have at least one finding — a k-anonymity floor
+    for the org-wide rollup (the true participant set across all runs isn't
+    stored; this is a conservative lower bound)."""
+    row = conn.execute(
+        "SELECT COUNT(DISTINCT author_id) AS n FROM findings"
+    ).fetchone()
+    return row["n"] if row else 0
+
+
 def behavior_counts(conn: sqlite3.Connection) -> list[dict]:
     """How often each named behavior fired across all runs — most frequent first."""
     rows = conn.execute(
