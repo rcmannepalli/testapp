@@ -10,6 +10,9 @@ Usage:
     python score.py --save sample_transcripts/standup.json    # persist to SQLite
     python score.py --save --db mine.db transcript.json       # custom db path
     python score.py --save --require-consent transcript.json  # only opted-in people
+    python score.py --estimate transcript.json                # project cost, no spend
+    python score.py --max-cost 0.50 transcript.json           # abort if too pricey
+    python score.py --model claude-haiku-4-5 transcript.json  # cheaper tier
 
 Reads a transcript JSON ({"channel": str, "messages": [{"author", "text"}, ...]}),
 scores it against the Respect & Listening rubric using Claude, and prints per-message
@@ -22,6 +25,13 @@ Read them back with trends.py.
 With --require-consent, only authors who have opted in (see consent.py) are scored
 or stored — non-consented people's messages are dropped before anything is sent to
 the model. This is the PRODUCT.md §5 opt-in gate; turn it on for any real data.
+
+Cost controls (see cost.py) — scoring is a paid API call, so the scorer never
+spends silently. Every live run prints what it cost. --estimate projects the
+worst-case cost from a free token count and spends nothing; --max-cost DOLLARS
+aborts before paying if that projection exceeds the cap; --model runs a cheaper
+tier (e.g. claude-haiku-4-5) for bulk scoring. The static rubric is sent as a
+cached system prompt so repeated runs pay a reduced rate on it.
 """
 import json
 import os
@@ -31,6 +41,7 @@ from collections import defaultdict
 from rubric import DISRESPECTFUL, FINDINGS_SCHEMA, RESPECTFUL, system_prompt
 
 MODEL = "claude-opus-4-8"
+MAX_TOKENS = 16000  # output ceiling per scoring call (also the cost-estimate ceiling)
 K_ANON = 5  # never show a team rollup for fewer than this many distinct participants
 
 
@@ -75,8 +86,13 @@ def attach_identity(transcript: dict, findings: list[dict]) -> None:
         f["author_id"] = m["author_id"]
 
 
-def score_transcript(client, transcript: dict) -> list[dict]:
-    """Return the model's findings for every message in the transcript."""
+def build_request(transcript: dict) -> tuple[list, list]:
+    """Build the (system, messages) pair for scoring a transcript.
+
+    Shared by the real call and the cost estimator so both price the exact same
+    request. The rubric is the same on every run, so it's sent as a cached
+    system block — repeated runs pay the reduced cache-read rate on it.
+    """
     numbered = [
         {"message_index": i, "author": m.get("author", "unknown"), "text": m["text"]}
         for i, m in enumerate(transcript["messages"])
@@ -86,17 +102,30 @@ def score_transcript(client, transcript: dict) -> list[dict]:
         "Score each message below. Report only genuine findings.\n\n"
         f"{json.dumps(numbered, indent=2)}"
     )
+    system = [
+        {
+            "type": "text",
+            "text": system_prompt(),
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
+    messages = [{"role": "user", "content": user_content}]
+    return system, messages
 
+
+def score_transcript(client, transcript: dict, model: str = MODEL):
+    """Score a transcript. Returns (findings, usage) — usage drives cost reporting."""
+    system, messages = build_request(transcript)
     response = client.messages.create(
-        model=MODEL,
-        max_tokens=16000,
+        model=model,
+        max_tokens=MAX_TOKENS,
         thinking={"type": "adaptive"},
-        system=system_prompt(),
-        messages=[{"role": "user", "content": user_content}],
+        system=system,
+        messages=messages,
         output_config={"format": {"type": "json_schema", "schema": FINDINGS_SCHEMA}},
     )
     text = next(b.text for b in response.content if b.type == "text")
-    return json.loads(text)["findings"]
+    return json.loads(text)["findings"], response.usage
 
 
 def respect_index(findings: list[dict]) -> int:
@@ -186,15 +215,31 @@ def main() -> None:
     demo = "--demo" in args
     save = "--save" in args
     require_consent = "--require-consent" in args
+    estimate = "--estimate" in args
 
-    # --db takes a value; pull it (and its value) out before reading positionals.
-    db_path = None
-    if "--db" in args:
-        i = args.index("--db")
-        if i + 1 >= len(args):
-            sys.exit("--db needs a path, e.g. --db sugapp.db")
-        db_path = args[i + 1]
+    def take_value(flag: str, example: str) -> str | None:
+        """Pull `--flag value` out of args, returning value (or None if absent)."""
+        nonlocal args
+        if flag not in args:
+            return None
+        i = args.index(flag)
+        if i + 1 >= len(args) or args[i + 1].startswith("--"):
+            sys.exit(f"{flag} needs a value, e.g. {flag} {example}")
+        value = args[i + 1]
         args = args[:i] + args[i + 2 :]
+        return value
+
+    # Value-bearing flags (pull them out before reading positionals).
+    db_path = take_value("--db", "sugapp.db")
+    model = take_value("--model", "claude-haiku-4-5") or MODEL
+
+    max_cost = None
+    raw_max_cost = take_value("--max-cost", "0.50")
+    if raw_max_cost is not None:
+        try:
+            max_cost = float(raw_max_cost)
+        except ValueError:
+            sys.exit(f"--max-cost needs a dollar amount, e.g. --max-cost 0.50 (got {raw_max_cost!r})")
 
     paths = [a for a in args if not a.startswith("--")]
     if len(paths) != 1:
@@ -226,6 +271,8 @@ def main() -> None:
             transcript, _ = apply_consent(transcript, None, consented)
 
     if demo:
+        if estimate:
+            sys.exit("--estimate is for live runs; --demo spends nothing to begin with.")
         # Offline mode: render a bundled fixture of expected model output so the
         # pipeline (evidence, rewrites, Respect Index, k-anonymity) can be seen
         # with no API key and no token spend. Looks for <transcript>.findings.json.
@@ -237,8 +284,29 @@ def main() -> None:
             transcript, findings = apply_consent(transcript, findings, consented)
     else:
         import anthropic  # only needed for a live scoring run
+        import cost
 
-        findings = score_transcript(anthropic.Anthropic(), transcript)
+        client = anthropic.Anthropic()
+
+        # Cost pre-flight: --estimate (dry run) and --max-cost both need the
+        # projected worst-case cost, from a free token count of the real request.
+        if estimate or max_cost is not None:
+            system, messages = build_request(transcript)
+            try:
+                n_in = cost.count_input_tokens(client, model, system, messages)
+                projected = cost.estimate_cost(n_in, model, MAX_TOKENS)
+            except ValueError as e:
+                sys.exit(f"  cost pre-flight failed: {e}")
+            print(f"  cost estimate: ~{cost.fmt_usd(projected)} worst case "
+                  f"({n_in:,} input tokens + up to {MAX_TOKENS:,} output @ {model})")
+            if max_cost is not None and projected > max_cost:
+                sys.exit(f"  aborted: projected ~{cost.fmt_usd(projected)} exceeds "
+                         f"--max-cost {cost.fmt_usd(max_cost)} (nothing was spent).")
+            if estimate:
+                return  # dry run: report the projection and stop before paying.
+
+        findings, usage = score_transcript(client, transcript, model=model)
+        print(f"  cost: {cost.summarize(usage, model)}")
 
     # Identity is authoritative from the transcript, not the model.
     attach_identity(transcript, findings)

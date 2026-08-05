@@ -86,6 +86,25 @@ The real validation is comparing live output to your own judgment on transcripts
 does it catch the dismissive line you'd have flagged? Does it avoid false positives on
 blunt-but-respectful disagreement? Tune `rubric.py` from what you see.
 
+### Cost controls (`cost.py`)
+
+Live scoring is a paid API call, so the scorer never spends silently — every live run
+prints what it cost. Three knobs keep spend predictable:
+
+```bash
+# Project the worst-case cost from a free token count, spend nothing:
+python score.py --estimate my_transcript.json
+
+# Abort before paying if the projection exceeds a cap:
+python score.py --max-cost 0.50 my_transcript.json
+
+# Run a cheaper tier for bulk scoring (default is claude-opus-4-8):
+python score.py --model claude-haiku-4-5 my_transcript.json
+```
+
+The static rubric is sent as a cached system prompt, so repeated runs pay a reduced
+rate on it. Prices live in one place (`cost.py`) — update them from the pricing page.
+
 ### Transcript format
 
 A JSON object with a `channel` label and a list of `messages`:
