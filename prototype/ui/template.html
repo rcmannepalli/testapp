@@ -206,6 +206,7 @@
   .dp-line{font-size:12.5px;color:var(--muted);margin:3px 0}
   .dp-lbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-right:6px}
   .dp-lbl.pos{color:var(--pos)} .dp-lbl.neg{color:var(--neg)}
+  .dp-ex{font-size:12.5px;color:var(--ink);margin:2px 0 2px 4px}
   .dp-note{font-size:11px;color:var(--faint);margin-top:9px;border-top:1px solid var(--line);padding-top:8px}
   .brow-detail{grid-column:1/-1;font-size:12.5px;color:var(--muted);background:var(--surface-2);
     border-radius:8px;padding:9px 11px;margin-top:2px}
@@ -471,6 +472,17 @@
       "Dismissiveness":"Minimizing or belittling language ('obviously', 'as I already said') that makes others feel small.",
       "Personal attack":"Attacks the person rather than the idea.",
       "Gatekeeping":"Blocks with process or territory instead of enabling."
+    },
+    behaviorExamples:{
+      "Acknowledgment":["building on Dana's point…","good call, and…"],
+      "Question-asking":["could we also check…?","what's driving that?"],
+      "Invites others":["what does everyone think?","Sam, you were closer to this"],
+      "Disagree with dignity":["that won't work because X","I'd push back on the timeline, here's why"],
+      "Credit &amp; attribution":["that was Sam's idea","thanks Priya, that's the piece I was missing"],
+      "Enabling":["here's how we can…","let me unblock you"],
+      "Dismissiveness":["obviously","as I already said","anyone knows that"],
+      "Personal attack":["that's a naive take","you clearly didn't read it"],
+      "Gatekeeping":["not my job","that's not the process","you'll have to file a ticket"]
     }
   };
 
@@ -509,13 +521,23 @@
     if(d.lost&&d.lost.length) s+=" Lost points to: "+pairsStr(d.lost)+".";
     return s+" Click for the full breakdown. (Aggregate — exact lines are in each person's mirror.)";
   }
+  function exStr(label){
+    var ex=(org.behaviorExamples&&org.behaviorExamples[label])||[];
+    return ex.length?" — sounds like "+ex.map(function(e){return "“"+e+"”";}).join(", "):"";
+  }
+  function behLines(arr,cls,lbl){
+    if(!arr||!arr.length) return "";
+    var h='<div class="dp-line"><span class="dp-lbl '+cls+'">'+lbl+'</span></div>';
+    arr.forEach(function(x){ h+='<div class="dp-ex">'+x[0]+' ×'+x[1]+exStr(x[0])+'</div>'; });
+    return h;
+  }
   function tileDetailHTML(t){
     var d=t[6]||{};
     var h='<div class="dp-head">'+t[0]+'</div><div class="dp-why">'+(d.why||"")+'</div>';
-    if(d.made&&d.made.length) h+='<div class="dp-line"><span class="dp-lbl pos">Lifted by</span>'+pairsStr(d.made)+'</div>';
-    if(d.lost&&d.lost.length) h+='<div class="dp-line"><span class="dp-lbl neg">Lost points to</span>'+pairsStr(d.lost)+'</div>';
+    h+=behLines(d.made,"pos","Lifted by");
+    h+=behLines(d.lost,"neg","Lost points to — the words that cost points");
     if(!(d.made&&d.made.length)&&!(d.lost&&d.lost.length)) h+='<div class="dp-line">No behaviors flagged for this metric yet.</div>';
-    h+='<div class="dp-note">Org view is aggregate and k-anonymized — the exact quoted lines are private to each person’s mirror.</div>';
+    h+='<div class="dp-note">Typical phrasings from the rubric — not anyone’s real words. The exact lines each person said stay in their private mirror.</div>';
     return h;
   }
   // Fallback coaching when the backend didn't supply suggestions (standalone/demo).
@@ -604,9 +626,12 @@
         +'<span class="track"><i style="width:'+(n/max*100)+'%;background:'+color+'"></i></span>'
         +'<span class="n num">'+n+'</span>';
       var detail=el("div","brow-detail hide");
+      var ex=(defs&&org.behaviorExamples&&org.behaviorExamples[name])||[];
+      var exHtml=ex.length?'<div style="margin-top:4px;color:var(--muted)">Sounds like: '+ex.map(function(e){return "“"+e+"”";}).join(", ")+'</div>':'';
       detail.innerHTML='<div class="bd-def">'+(def||name)+'</div>'
+        +exHtml
         +'<div style="margin-top:4px">'+n+' this week · '+share+'% of flagged behaviors · '+effect+'</div>'
-        +'<div style="color:var(--faint);margin-top:5px">Aggregate — the exact quoted lines are private to each person’s mirror.</div>';
+        +'<div style="color:var(--faint);margin-top:5px">Typical phrasings from the rubric — the exact lines each person said stay in their private mirror.</div>';
       function toggle(){ var open=row.getAttribute("aria-expanded")==="true"; row.setAttribute("aria-expanded",open?"false":"true"); detail.classList.toggle("hide",open); }
       row.addEventListener("click",toggle);
       row.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();} });

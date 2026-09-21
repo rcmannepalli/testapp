@@ -15,45 +15,54 @@ BEHAVIORS = {
         "polarity": "respectful",
         "definition": "References or builds on what someone else said before responding "
         "('building on Dana's point...', 'good call, and...').",
+        "examples": ["building on Dana's point…", "good call, and…"],
     },
     "question_asking": {
         "polarity": "respectful",
         "definition": "Asks a genuine, curious question rather than only asserting.",
+        "examples": ["could we also check…?", "what's driving that?"],
     },
     "invites_others": {
         "polarity": "respectful",
         "definition": "Explicitly makes room for others to speak or contribute "
         "('what does everyone think?', 'Sam, you were closer to this').",
+        "examples": ["what does everyone think?", "Sam, you were closer to this"],
     },
     # --- Respect-in-disagreement signals (signature) -----------------------
     "disagree_with_dignity": {
         "polarity": "respectful",
         "definition": "Pushes back on the IDEA, not the person "
         "('that won't work because X' rather than 'that's a naive take').",
+        "examples": ["that won't work because X", "I'd push back on the timeline, here's why"],
     },
     "credit_attribution": {
         "polarity": "respectful",
         "definition": "Acknowledges whose idea or work it was.",
+        "examples": ["that was Sam's idea", "thanks Priya, that's the piece I was missing"],
     },
     "dismissiveness": {
         "polarity": "disrespectful",
         "definition": "Minimizing or belittling language: 'obviously', 'as I already said', "
         "'that's not how it works', 'anyone knows that'. Makes the other person feel small.",
+        "examples": ["obviously", "as I already said", "anyone knows that"],
     },
     "personal_attack": {
         "polarity": "disrespectful",
         "definition": "Attacks the person rather than the idea ('that's a naive take', "
         "'you clearly didn't read it').",
+        "examples": ["that's a naive take", "you clearly didn't read it"],
     },
     # --- Bureaucratic-drift signals (the tenure problem) -------------------
     "gatekeeping": {
         "polarity": "disrespectful",
         "definition": "Blocks with process/territory instead of enabling "
         "('not my job', 'that's not the process', 'you'll have to file a ticket').",
+        "examples": ["not my job", "that's not the process", "you'll have to file a ticket"],
     },
     "enabling": {
         "polarity": "respectful",
         "definition": "Offers a path forward ('here's how we can', 'let me unblock you').",
+        "examples": ["here's how we can…", "let me unblock you"],
     },
 }
 

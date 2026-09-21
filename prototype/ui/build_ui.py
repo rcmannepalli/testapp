@@ -150,6 +150,10 @@ def build(db_path):
 
     # behavior label → plain-English definition, for behavior-balance drill-down.
     behavior_defs = {LABEL.get(b, b): BEHAVIORS[b]["definition"] for b in BEHAVIORS}
+    # behavior label → characteristic phrasings (the rubric's examples). Shown at
+    # the org level as "sounds like…" — typical phrasings, NOT anyone's real words
+    # (those stay in each person's private mirror, per k-anonymity).
+    behavior_examples = {LABEL.get(b, b): BEHAVIORS[b].get("examples", []) for b in BEHAVIORS}
 
     total_people = sum(t[1] for t in teams)
     latest_date = datetime.fromisoformat(runs[-1]["created_at"]).strftime("%b %-d, %Y")
@@ -160,6 +164,7 @@ def build(db_path):
         "trend": trend, "trendLabels": trend_labels,
         "tiles": tiles, "balance": balance, "teams": teams,
         "behaviorDefs": behavior_defs,
+        "behaviorExamples": behavior_examples,
     }
 
     # --- People (personal mirror). Keyed by the stable author_id; display by name.
