@@ -23,6 +23,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import store  # noqa: E402
 from score import K_ANON, respect_index  # noqa: E402
+from rubric import BEHAVIORS  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -117,12 +118,38 @@ def build(db_path):
     neg = sum(n for b, n in counts.items() if b in store_neg())
     listening = counts["acknowledgment"] + counts["question_asking"] + counts["invites_others"]
     dwd, atk = counts["disagree_with_dignity"], counts["personal_attack"]
+
+    def _pairs(behaviors):
+        """[[display label, count], ...] for the behaviors that actually occurred."""
+        return [[LABEL.get(b, b), counts[b]] for b in behaviors if counts.get(b)]
+
+    # Each tile carries a `detail`: why the number is what it is, which behaviors
+    # LIFTED it, and which LOST points — the aggregate breakdown for drill-down.
+    # Driven by the rubric's behaviors, so it generalizes to any rubric.
+    resp_share = pct(pos, pos + neg)
+    dwd_pct = pct(dwd, dwd + atk)
     tiles = [
-        ["Respectful share", pct(pos, pos + neg), "%", "good", pct(pos, pos + neg), "of flagged behaviors"],
-        ["Listening moments", listening, "", "good", min(100, listening * 11 + 8), "acknowledge · ask · invite"],
-        ["Disagree w/ dignity", pct(dwd, dwd + atk), "%", "good", pct(dwd, dwd + atk), "of disagreements stay respectful"],
-        ["Dismissive moments", counts["dismissiveness"], "", "bad", min(100, counts["dismissiveness"] * 14 + 8), "lower is better"],
+        ["Respectful share", resp_share, "%", "good", resp_share, "of flagged behaviors",
+         {"why": f"{resp_share}% = {pos} respectful of {pos + neg} flagged behaviors this week.",
+          "made": _pairs([b for b in BEHAVIORS if BEHAVIORS[b]["polarity"] == "respectful"]),
+          "lost": _pairs([b for b in BEHAVIORS if BEHAVIORS[b]["polarity"] == "disrespectful"])}],
+        ["Listening moments", listening, "", "good", min(100, listening * 11 + 8), "acknowledge · ask · invite",
+         {"why": f"{listening} listening moments = acknowledgment + question-asking + inviting others.",
+          "made": _pairs(["acknowledgment", "question_asking", "invites_others"]),
+          "lost": _pairs(["dismissiveness"])}],
+        ["Disagree w/ dignity", dwd_pct, "%", "good", dwd_pct, "of disagreements stay respectful",
+         {"why": (f"{dwd_pct}% = {dwd} of {dwd + atk} disagreement moments stayed respectful."
+                  if (dwd + atk) else "No disagreement moments flagged this week."),
+          "made": _pairs(["disagree_with_dignity"]),
+          "lost": _pairs(["personal_attack"])}],
+        ["Dismissive moments", counts["dismissiveness"], "", "bad", min(100, counts["dismissiveness"] * 14 + 8), "lower is better",
+         {"why": f"{counts['dismissiveness']} dismissive moments this week — these drag the rating down.",
+          "made": [],
+          "lost": _pairs(["dismissiveness"])}],
     ]
+
+    # behavior label → plain-English definition, for behavior-balance drill-down.
+    behavior_defs = {LABEL.get(b, b): BEHAVIORS[b]["definition"] for b in BEHAVIORS}
 
     total_people = sum(t[1] for t in teams)
     latest_date = datetime.fromisoformat(runs[-1]["created_at"]).strftime("%b %-d, %Y")
@@ -132,6 +159,7 @@ def build(db_path):
                f"· {len(store.consented_authors(conn))} opted in",
         "trend": trend, "trendLabels": trend_labels,
         "tiles": tiles, "balance": balance, "teams": teams,
+        "behaviorDefs": behavior_defs,
     }
 
     # --- People (personal mirror). Keyed by the stable author_id; display by name.

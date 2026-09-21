@@ -196,6 +196,20 @@
   .rf-lbl.neg{color:var(--neg)} .rf-lbl.pos{color:var(--pos)}
   .rf-arrow{color:var(--faint);text-align:center;font-size:14px;margin:3px 0}
   .reframe-item .quote{margin-top:4px}
+  /* drill-down detail */
+  .tile,.brow{cursor:pointer}
+  .tile[aria-expanded="true"]{outline:2px solid var(--brand);outline-offset:1px}
+  .detailpanel{margin-top:12px;background:var(--surface);border:1px solid var(--line-2);
+    border-radius:var(--r-sm);padding:14px 16px;box-shadow:var(--shadow)}
+  .dp-head{font-weight:600;font-size:13.5px;margin-bottom:6px}
+  .dp-why{font-size:13px;color:var(--ink);margin-bottom:8px}
+  .dp-line{font-size:12.5px;color:var(--muted);margin:3px 0}
+  .dp-lbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-right:6px}
+  .dp-lbl.pos{color:var(--pos)} .dp-lbl.neg{color:var(--neg)}
+  .dp-note{font-size:11px;color:var(--faint);margin-top:9px;border-top:1px solid var(--line);padding-top:8px}
+  .brow-detail{grid-column:1/-1;font-size:12.5px;color:var(--muted);background:var(--surface-2);
+    border-radius:8px;padding:9px 11px;margin-top:2px}
+  .brow-detail .bd-def{color:var(--ink)}
 
   .hide{display:none!important}
   :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
@@ -271,6 +285,7 @@
       </div>
 
       <div class="tiles" style="margin-top:16px" id="orgtiles"></div>
+      <div id="orgtile-detail" class="detailpanel hide"></div>
 
       <div class="grid" style="grid-template-columns:1.1fr 1fr;margin-top:16px">
         <div class="card">
@@ -429,10 +444,14 @@
   var org = {
     index:76, delta:3, trend:[70,72,73,76],
     tiles:[
-      ["Acknowledgment rate",63,"%","good",78,"build on what others said"],
-      ["Question : assertion",0.6,"","good",60,"curiosity vs. pure telling"],
-      ["Disagree with dignity",71,"%","good",71,"pushback that stays respectful"],
-      ["Dismissive language",8,"%","bad",8,"lower is better"]
+      ["Acknowledgment rate",63,"%","good",78,"build on what others said",
+        {why:"63% of listening moments were acknowledgments — building on what others said.",made:[["Acknowledgment",6]],lost:[["Dismissiveness",5]]}],
+      ["Question : assertion",0.6,"","good",60,"curiosity vs. pure telling",
+        {why:"0.6 genuine questions per assertion this week — curiosity vs. pure telling.",made:[["Question-asking",4]],lost:[]}],
+      ["Disagree with dignity",71,"%","good",71,"pushback that stays respectful",
+        {why:"71% = 5 of 7 disagreement moments stayed respectful.",made:[["Disagree with dignity",5]],lost:[["Personal attack",2]]}],
+      ["Dismissive language",8,"%","bad",8,"lower is better",
+        {why:"8% of flagged behaviors were dismissive — these drag the rating down.",made:[],lost:[["Dismissiveness",5]]}]
     ],
     balance:[
       ["Acknowledgment",POS,6],["Disagree with dignity",POS,5],["Enabling",POS,4],
@@ -441,7 +460,18 @@
     ],
     teams:[
       ["Growth",7,82,"#0e9e7a"],["Platform",5,67,"#155e4c"],["Design",3,null,"#c85a34"]
-    ]
+    ],
+    behaviorDefs:{
+      "Acknowledgment":"References or builds on what someone else said before responding.",
+      "Question-asking":"Asks a genuine, curious question rather than only asserting.",
+      "Invites others":"Explicitly makes room for others to speak or contribute.",
+      "Disagree with dignity":"Pushes back on the idea, not the person (a concrete reason, no jab).",
+      "Credit &amp; attribution":"Acknowledges whose idea or work it was.",
+      "Enabling":"Offers a path forward — 'here's how we can', 'let me unblock you'.",
+      "Dismissiveness":"Minimizing or belittling language ('obviously', 'as I already said') that makes others feel small.",
+      "Personal attack":"Attacks the person rather than the idea.",
+      "Gatekeeping":"Blocks with process or territory instead of enabling."
+    }
   };
 
   // Build step replaces the token below with the exported DB view-model.
@@ -471,6 +501,22 @@
     var top=null,n=0; for(var b in counts){ if(counts[b]>n){n=counts[b];top=b;} }
     if(top && GROWTH[top]) return {area:GROWTH[top][0], why:GROWTH[top][1], behavior:top, n:n};
     return null;
+  }
+  // ---- Drill-down helpers (generic — driven by each tile's detail + rubric defs) ----
+  function pairsStr(arr){ return (arr||[]).map(function(x){return x[0]+" ×"+x[1];}).join(", "); }
+  function tileTip(t){
+    var d=t[6]||{}, s=t[0]+": "+t[1]+(t[2]||"")+". "+(d.why||"");
+    if(d.lost&&d.lost.length) s+=" Lost points to: "+pairsStr(d.lost)+".";
+    return s+" Click for the full breakdown. (Aggregate — exact lines are in each person's mirror.)";
+  }
+  function tileDetailHTML(t){
+    var d=t[6]||{};
+    var h='<div class="dp-head">'+t[0]+'</div><div class="dp-why">'+(d.why||"")+'</div>';
+    if(d.made&&d.made.length) h+='<div class="dp-line"><span class="dp-lbl pos">Lifted by</span>'+pairsStr(d.made)+'</div>';
+    if(d.lost&&d.lost.length) h+='<div class="dp-line"><span class="dp-lbl neg">Lost points to</span>'+pairsStr(d.lost)+'</div>';
+    if(!(d.made&&d.made.length)&&!(d.lost&&d.lost.length)) h+='<div class="dp-line">No behaviors flagged for this metric yet.</div>';
+    h+='<div class="dp-note">Org view is aggregate and k-anonymized — the exact quoted lines are private to each person’s mirror.</div>';
+    return h;
   }
   // Fallback coaching when the backend didn't supply suggestions (standalone/demo).
   function deriveSuggestions(p){
@@ -512,35 +558,59 @@
       +data.map(function(v,i){return '<circle cx="'+xs(i)+'" cy="'+ys(v)+'" r="9" fill="transparent" class="sp" data-v="'+v+'"/>';}).join("");
   }
 
-  // ---------- Org tiles ----------
+  // ---------- Org tiles (clickable → breakdown) ----------
   function renderOrgTiles(){
     var wrap=$("#orgtiles"); wrap.innerHTML="";
-    org.tiles.forEach(function(t){
-      var name=t[0],val=t[1],unit=t[2],dir=t[3],pct=t[4],hint=t[5];
-      var good=dir==="good";
-      var color=good?"var(--pos)":"var(--neg)";
+    var panel=$("#orgtile-detail");
+    function openDetail(i,tileEl){
+      var already=tileEl.getAttribute("aria-expanded")==="true";
+      [].forEach.call(wrap.children,function(c){c.setAttribute("aria-expanded","false");});
+      if(already){ panel.classList.add("hide"); return; }
+      tileEl.setAttribute("aria-expanded","true");
+      panel.innerHTML=tileDetailHTML(org.tiles[i]); panel.classList.remove("hide");
+    }
+    org.tiles.forEach(function(t,i){
+      var name=t[0],val=t[1],unit=t[2],dir=t[3],pctv=t[4],hint=t[5];
+      var color=dir==="good"?"var(--pos)":"var(--neg)";
       var tile=el("div","tile");
-      tile.setAttribute("data-tip",name+": "+val+(unit||"")+" — "+hint+". Basis: aggregated from this week's flagged behaviors across k-anonymous teams.");
+      tile.setAttribute("data-tip",tileTip(t));
+      tile.setAttribute("tabindex","0"); tile.setAttribute("role","button"); tile.setAttribute("aria-expanded","false");
       tile.innerHTML='<div class="k"><span class="dot" style="background:'+color+'"></span>'+name+'</div>'
         +'<div class="v num">'+val+'<small>'+(unit||"")+'</small></div>'
-        +'<div class="meter"><i style="width:'+pct+'%;background:'+color+'"></i></div>'
-        +'<div style="font-size:11.5px;color:var(--faint);margin-top:8px">'+hint+'</div>';
+        +'<div class="meter"><i style="width:'+pctv+'%;background:'+color+'"></i></div>'
+        +'<div style="font-size:11.5px;color:var(--faint);margin-top:8px">'+hint+' · click for details</div>';
+      tile.addEventListener("click",function(){ openDetail(i,tile); });
+      tile.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();openDetail(i,tile);} });
       wrap.appendChild(tile);
     });
   }
 
-  // ---------- Behavior balance ----------
+  // ---------- Behavior balance (clickable → definition + share) ----------
   function renderBalance(){
     var wrap=$("#balance"); wrap.innerHTML="";
     var max=Math.max.apply(0,org.balance.map(function(b){return b[2]}));
+    var total=org.balance.reduce(function(a,b){return a+b[2];},0);
+    var defs=org.behaviorDefs||{};
     org.balance.forEach(function(b){
       var name=b[0],pol=b[1],n=b[2];
       var color=pol===POS?"var(--pos)":"var(--neg)";
+      var share=total?Math.round(100*n/total):0;
+      var def=defs[name]||"";
+      var effect=pol===POS?"Lifts the Respect rating.":"Lowers the Respect rating — a place to improve.";
       var row=el("div","brow");
+      row.setAttribute("tabindex","0"); row.setAttribute("role","button"); row.setAttribute("aria-expanded","false");
+      row.setAttribute("data-tip",name+": "+n+" this week · "+share+"% of flagged behaviors. "+(def?def+" ":"")+effect+" Click for details. (Aggregate — exact lines in individual mirrors.)");
       row.innerHTML='<span class="lbl"><span class="dot" style="background:'+color+'"></span>'+name+'</span>'
-        +'<span class="track"><i style="width:'+(n/max*100)+'%;background:'+color+'" title="'+n+' this week"></i></span>'
+        +'<span class="track"><i style="width:'+(n/max*100)+'%;background:'+color+'"></i></span>'
         +'<span class="n num">'+n+'</span>';
-      wrap.appendChild(row);
+      var detail=el("div","brow-detail hide");
+      detail.innerHTML='<div class="bd-def">'+(def||name)+'</div>'
+        +'<div style="margin-top:4px">'+n+' this week · '+share+'% of flagged behaviors · '+effect+'</div>'
+        +'<div style="color:var(--faint);margin-top:5px">Aggregate — the exact quoted lines are private to each person’s mirror.</div>';
+      function toggle(){ var open=row.getAttribute("aria-expanded")==="true"; row.setAttribute("aria-expanded",open?"false":"true"); detail.classList.toggle("hide",open); }
+      row.addEventListener("click",toggle);
+      row.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();} });
+      wrap.appendChild(row); wrap.appendChild(detail);
     });
   }
 
