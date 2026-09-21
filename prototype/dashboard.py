@@ -23,7 +23,7 @@ import os
 import sys
 
 import store
-from score import K_ANON, respect_index
+from score import K_ANON, respect_index, to_rating
 # Reuse the mirror's palette + helpers so the two dashboards stay visually in sync.
 from mirror import PALETTE, esc, fmt_date, balance_bar
 
@@ -46,7 +46,7 @@ def headline_html(history: list[dict]) -> str:
     idx = _index_from(pos, neg)
     return (
         '<div class="card headline">'
-        f'<div class="bignum index">{idx}<small>/ 100 Respect Index</small></div>'
+        f'<div class="bignum index">{to_rating(idx)}<small>/ 5 Respect rating</small></div>'
         f'<div style="flex:1; min-width:200px">{balance_bar(pos, neg)}'
         f'<div class="muted" style="margin-top:8px">across {len(eligible)} '
         f'run(s) · {pos} respectful, {neg} disrespectful behaviors{esc(note)}</div></div>'
@@ -65,7 +65,7 @@ def trend_html(history: list[dict]) -> str:
                    f'{r["participant_count"]} participants</span>')
             bar = '<div class="bar empty">k-anonymity</div>'
         else:
-            idx = f'<b class="index">{_index_from(pos, neg)}</b>'
+            idx = f'<b class="index">{to_rating(_index_from(pos, neg))}</b>'
             bar = balance_bar(pos, neg)
         out.append(
             '<div class="trow">'

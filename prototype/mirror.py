@@ -25,7 +25,7 @@ import os
 import sys
 
 import store
-from score import respect_index
+from score import respect_index, to_rating
 
 PALETTE = {
     "bg": "#F4F1EA", "card": "#FFFFFF", "ink": "#2B2A26", "muted": "#7A756B",
@@ -127,6 +127,7 @@ def render_page(author: str, findings: list[dict], timeline: list[dict],
     pos = sum(1 for f in findings if f["polarity"] == "respectful")
     neg = sum(1 for f in findings if f["polarity"] == "disrespectful")
     idx = respect_index(findings)
+    rating = to_rating(idx)
     p = PALETTE
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -207,7 +208,7 @@ def render_page(author: str, findings: list[dict], timeline: list[dict],
   {goal_html(goal, author)}
 
   <div class="card summary">
-    <div class="bignum index" title="Respect Index — the same 0–100 scale your team is measured on. 50 + 50×(landing well − worth a look) ÷ total; 75 when nothing is flagged.">{idx}<small>/ 100 Respect Index · same scale your team sees</small></div>
+    <div class="bignum index" title="Respect rating (1–5) — the same scale your team is measured on, derived from the Respect Index ({idx}/100). 1 = mostly to-work-on, 3 = balanced, 5 = mostly respectful.">{rating}<small>/ 5 Respect rating · same scale your team sees</small></div>
     <div class="bignum good">{pos}<small>landing well</small></div>
     <div class="bignum warn">{neg}<small>worth a look</small></div>
     <div style="flex:1; min-width:160px">{balance_bar(pos, neg)}</div>

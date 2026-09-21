@@ -141,6 +141,15 @@ def respect_index(findings: list[dict]) -> int:
     return round(max(0, min(100, score)))
 
 
+def to_rating(index: int) -> float:
+    """Map the 0-100 Respect Index onto a 1-5 rating (linear, one decimal).
+
+    The index stays the internal measure; 1-5 is the display scale everyone reads.
+    index 0 → 1.0, 50 (balanced) → 3.0, 75 (neutral) → 4.0, 100 → 5.0.
+    """
+    return round(1 + index / 25, 1)
+
+
 def render(transcript: dict, findings: list[dict]) -> None:
     messages = transcript["messages"]
     by_msg: dict[int, list[dict]] = defaultdict(list)

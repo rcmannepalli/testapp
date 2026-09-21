@@ -187,6 +187,15 @@
   .sugg .t{font-weight:600;font-size:13.5px}
   .sugg .s{color:var(--muted);font-size:13px;margin-top:1px}
   .moment .where{font-size:11.5px;color:var(--faint);margin-top:6px;display:flex;align-items:center;gap:5px}
+  .growth .ga{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--neg);margin-bottom:6px}
+  .growth .gwhy{font-size:13.5px;color:var(--ink)}
+  .growth .gtag{font-size:11.5px;color:var(--faint);margin-top:10px}
+  .reframe-item{border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;margin-bottom:10px;background:var(--surface-2)}
+  .reframe-item:last-child{margin-bottom:0}
+  .rf-lbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .rf-lbl.neg{color:var(--neg)} .rf-lbl.pos{color:var(--pos)}
+  .rf-arrow{color:var(--faint);text-align:center;font-size:14px;margin:3px 0}
+  .reframe-item .quote{margin-top:4px}
 
   .hide{display:none!important}
   :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
@@ -271,7 +280,7 @@
         <div class="card">
           <div class="cardhead"><div><h3>Teams</h3><div class="sub">Aggregate only · never individuals</div></div></div>
           <table>
-            <thead><tr><th>Team</th><th class="r">People</th><th class="r">Respect Index</th></tr></thead>
+            <thead><tr><th>Team</th><th class="r">People</th><th class="r">Rating (1–5)</th></tr></thead>
             <tbody id="teams"></tbody>
           </table>
           <div class="privacy" style="margin-top:14px">
@@ -298,17 +307,19 @@
           <div class="balance" style="margin-top:12px">
             <div class="big num" id="me-index" tabindex="0">—</div>
             <div style="flex:1">
-              <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
-                <b id="me-indexlbl" style="color:var(--ink)">Respect Index</b> · same scale your team is measured on
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px">
+                <b id="me-indexlbl" style="color:var(--ink)">Respect rating</b> · out of 5 · same scale your team is measured on
               </div>
+              <div id="me-stars" style="font-size:15px;letter-spacing:1px;margin-bottom:8px">—</div>
               <div class="split" id="me-split"></div>
               <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px">
                 <span id="me-poslbl">respectful</span><span id="me-neglbl">to work on</span>
               </div>
             </div>
           </div>
+          <div style="font-size:11.5px;color:var(--faint);margin-top:10px">Hover the rating to see where you gained and lost points.</div>
           <div id="me-trendwrap" class="hide" style="margin-top:16px">
-            <span class="eyebrow">Respect Index trend · per run, 0–100</span>
+            <span class="eyebrow">Respect rating trend · per run, 1–5</span>
             <svg class="spark" id="me-spark" viewBox="0 0 320 44" preserveAspectRatio="none" style="margin-top:6px"></svg>
           </div>
         </div>
@@ -322,6 +333,18 @@
       </div>
 
       <div class="tiles" style="margin-top:16px" id="me-tiles"></div>
+
+      <!-- Analytics side-by-side: where to grow + how to reframe -->
+      <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px">
+        <div class="card">
+          <div class="cardhead"><div><h3>Your area of growth</h3><div class="sub">The one thing to build next</div></div></div>
+          <div id="me-growth"></div>
+        </div>
+        <div class="card">
+          <div class="cardhead"><div><h3>How to reframe it</h3><div class="sub">Your exact words → a more respectful way to say them</div></div></div>
+          <div id="me-reframe"></div>
+        </div>
+      </div>
 
       <div class="card" style="margin-top:16px">
         <div class="cardhead"><div><h3>Ways to improve</h3><div class="sub">Specific options based on your recent moments — not a grade</div></div></div>
@@ -432,6 +455,23 @@
   // Same Respect Index formula as the backend (score.respect_index): one scale everywhere.
   function respectIndex(pos,neg){ var t=pos+neg; if(!t)return 75;
     return Math.round(Math.max(0,Math.min(100,50+50*(pos-neg)/t))); }
+  // Display scale: map the 0–100 index onto a 1–5 rating (score.to_rating).
+  function toRating(index){ return Math.round((1+index/25)*10)/10; }
+  function starStr(rating){ var r=Math.round(rating), s=""; for(var i=1;i<=5;i++) s+=(i<=r?"★":"☆"); return s; }
+  function rateColor(rating){ return rating>=3.8?"var(--pos)":rating>=3.0?"#c9a227":"var(--neg)"; }
+  // Behavior (display label) → area of growth + why. Used for the "area of growth" panel.
+  var GROWTH={
+    "Dismissiveness":["Listening without minimizing","Restate what others said instead of waving it off with “obviously” / “as I said”."],
+    "Personal attack":["Critiquing the idea, not the person","Name the specific concern; keep the person out of it when you disagree."],
+    "Gatekeeping":["Enabling over gatekeeping","When something isn't yours, offer a path forward instead of a wall."]
+  };
+  function growthFor(p){
+    var counts={};
+    p.moments.forEach(function(m){ if(m.p===NEG) counts[m.b]=(counts[m.b]||0)+1; });
+    var top=null,n=0; for(var b in counts){ if(counts[b]>n){n=counts[b];top=b;} }
+    if(top && GROWTH[top]) return {area:GROWTH[top][0], why:GROWTH[top][1], behavior:top, n:n};
+    return null;
+  }
   // Fallback coaching when the backend didn't supply suggestions (standalone/demo).
   function deriveSuggestions(p){
     var out=[];
@@ -445,12 +485,14 @@
     var g=$("#gauge"); var r=86, cx=98, cy=104, sw=15;
     function pt(a){var rad=(180-a*180)*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
     function arc(a0,a1){var p0=pt(a0),p1=pt(a1);var large=(a1-a0)>0.5?1:0;return "M"+p0[0]+" "+p0[1]+" A"+r+" "+r+" 0 "+large+" 1 "+p1[0]+" "+p1[1];}
-    var frac=v/100;
+    var frac=v/100, rating=toRating(v);
     var svg='<svg viewBox="0 0 196 118" width="196" height="118">'
       +'<path d="'+arc(0,1)+'" fill="none" stroke="var(--surface-2)" stroke-width="'+sw+'" stroke-linecap="round"/>'
       +'<path d="'+arc(0,frac)+'" fill="none" stroke="'+idxColor(v)+'" stroke-width="'+sw+'" stroke-linecap="round"/>'
       +'</svg>'
-      +'<div class="val" data-tip="Respect Index '+v+'/100 — one measure of respectful, listening behavior across the org. Basis: 50 + 50 × (respectful − disrespectful) ÷ total flagged behaviors, weighted across k-anonymous teams; 75 when nothing is flagged."><b class="num">'+v+'</b><i>out of 100</i></div>';
+      +'<div class="val" data-tip="Respect rating '+rating+'/5 (Respect Index '+v+'/100). '
+      +'Basis: 50 + 50 × (respectful − disrespectful) ÷ total flagged behaviors, weighted across k-anonymous teams; the 0–100 index maps onto 1–5.">'
+      +'<b class="num">'+rating+'</b><i>out of 5 · '+starStr(rating)+'</i></div>';
     g.innerHTML=svg;
   }
 
@@ -508,9 +550,13 @@
     org.teams.forEach(function(t){
       var name=t[0],ppl=t[1],idx=t[2],col=t[3];
       var tr=el("tr");
-      var cell = idx==null
-        ? '<span class="supp" data-tip="Suppressed for k-anonymity — this team has fewer than 5 opted-in people, so no reading could be traced to one person.">— suppressed (&lt;5)</span>'
-        : '<span class="idxchip" data-tip="Respect Index '+idx+'/100 for '+name+' ('+ppl+' people) — the same 0–100 scale as every other team and every individual mirror."><span class="teamdot" style="background:'+idxColor(idx)+'"></span><span class="num">'+idx+'</span></span>';
+      var cell;
+      if(idx==null){
+        cell='<span class="supp" data-tip="Suppressed for k-anonymity — this team has fewer than 5 opted-in people, so no reading could be traced to one person.">— suppressed (&lt;5)</span>';
+      } else {
+        var rt=toRating(idx);
+        cell='<span class="idxchip" data-tip="Respect rating '+rt+'/5 for '+name+' ('+ppl+' people) — the same 1–5 scale as every other team and every individual mirror ('+idx+'/100 index)."><span class="teamdot" style="background:'+idxColor(idx)+'"></span><span class="num">'+rt+'</span><span style="color:var(--faint);font-weight:400;font-size:12px"> /5</span></span>';
+      }
       tr.innerHTML='<td><span class="teamdot" style="display:inline-block;margin-right:8px;background:'+col+'"></span>'+name+'</td>'
         +'<td class="r num">'+ppl+'</td><td class="r">'+cell+'</td>';
       tb.appendChild(tr);
@@ -523,12 +569,21 @@
     $("#me-sub").textContent = (p.you?"This is your mirror. ":"Viewing "+p.name+"’s mirror (demo). ")+"Your leaders and teammates cannot see this.";
     var total=p.pos+p.neg;
     var pidx=(p.index!=null)?p.index:respectIndex(p.pos,p.neg);
+    var rating=toRating(pidx);
+    function whereShort(m){ return m.where ? m.where.split("· ")[1]||m.where : ""; }
+    var gained=p.moments.filter(function(m){return m.p===POS;})
+      .map(function(m){return m.b+(whereShort(m)?" ("+whereShort(m)+")":"");});
+    var lost=p.moments.filter(function(m){return m.p===NEG;})
+      .map(function(m){return m.b+(whereShort(m)?" ("+whereShort(m)+")":"");});
     var mi=$("#me-index");
-    mi.textContent=pidx;
-    mi.style.color=idxColor(pidx);
-    mi.setAttribute("data-tip","Respect Index "+pidx+"/100 — the same scale your team is measured on. "
-      +"Basis: 50 + 50 × (respectful − to-work-on) ÷ total; 75 when nothing is flagged. "
-      +"This week you had "+p.pos+" respectful and "+p.neg+" to-work-on moments (see below).");
+    mi.textContent=rating.toFixed(1);
+    mi.style.color=rateColor(rating);
+    $("#me-stars").textContent=starStr(rating);
+    $("#me-stars").style.color=rateColor(rating);
+    mi.setAttribute("data-tip","Respect rating "+rating+"/5  (Respect Index "+pidx+"/100). "
+      +(gained.length?"▲ Gained points: "+gained.join(", ")+".  ":"")
+      +(lost.length?"▼ Lost points: "+lost.join(", ")+".  ":"")
+      +"Basis: 50 + 50 × (respectful − to-work-on) ÷ total, mapped 0–100 → 1–5.");
     $("#me-poslbl").textContent=p.pos+" respectful";
     $("#me-neglbl").textContent=p.neg+" to work on";
     var split=$("#me-split"); split.innerHTML="";
@@ -571,6 +626,34 @@
       mm.appendChild(node);
     });
 
+    // Area of growth — the single behavior to build next.
+    var gw=$("#me-growth");
+    var g=growthFor(p);
+    if(g){
+      gw.innerHTML='<div class="growth"><div class="ga">'+g.area+'</div>'
+        +'<div class="gwhy">'+g.why+'</div>'
+        +'<div class="gtag">Based on '+g.n+' '+g.behavior.toLowerCase()+' moment'+(g.n>1?"s":"")+' this week — see the reframes on the right.</div></div>';
+    } else {
+      gw.innerHTML='<div class="growth"><div class="ga" style="color:var(--pos)">You’re in good shape</div>'
+        +'<div class="gwhy">No rough moments this week — keep crediting people and inviting others in.</div></div>';
+    }
+
+    // How to reframe it — the exact words → a more respectful version.
+    var rf=$("#me-reframe"); rf.innerHTML="";
+    var reframes=p.moments.filter(function(m){return m.p===NEG && m.rw;});
+    if(!reframes.length){
+      rf.innerHTML='<div style="color:var(--muted);font-size:13px">Nothing to reframe this week — no rough moments.</div>';
+    }
+    reframes.forEach(function(m){
+      var item=el("div","reframe-item");
+      item.innerHTML='<div class="rf-said"><span class="rf-lbl neg">You said'+(whereShort(m)?' · '+whereShort(m):'')+'</span>'
+        +'<blockquote class="quote">“'+m.q+'”</blockquote></div>'
+        +'<div class="rf-arrow">↓</div>'
+        +'<div class="rf-try"><span class="rf-lbl pos">Try instead</span>'
+        +'<blockquote class="quote">“'+m.rw+'”</blockquote></div>';
+      rf.appendChild(item);
+    });
+
     var tw2=$("#me-trendwrap");
     var series=p.indexTrend||[];
     if(series.length>1){ tw2.classList.remove("hide"); drawSpark("#me-spark",series); }
@@ -607,7 +690,7 @@
   function hideTip(){ tt.style.opacity="0"; }
   function tipFor(node){
     var c=node.closest(".sp");
-    if(c) return {el:c, text:"Respect Index "+c.getAttribute("data-v")};
+    if(c){ var iv=+c.getAttribute("data-v"); return {el:c, text:"Respect rating "+toRating(iv)+"/5  ("+iv+"/100)"}; }
     var d=node.closest("[data-tip]");
     if(d) return {el:d, text:d.getAttribute("data-tip")};
     return null;
