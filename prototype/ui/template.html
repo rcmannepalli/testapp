@@ -176,8 +176,17 @@
 
   .spark{width:100%;height:44px;display:block;overflow:visible}
   .tt{position:fixed;pointer-events:none;background:var(--ink);color:var(--surface);
-    font-size:12px;padding:5px 8px;border-radius:7px;opacity:0;transform:translate(-50%,-100%);
-    transition:opacity .1s;white-space:nowrap;z-index:20;font-variant-numeric:tabular-nums}
+    font-size:12px;padding:7px 10px;border-radius:8px;opacity:0;transform:translate(-50%,-100%);
+    transition:opacity .1s;max-width:280px;white-space:normal;line-height:1.4;text-align:left;
+    z-index:20;box-shadow:var(--shadow)}
+  [data-tip]{cursor:help}
+  .suggest{display:flex;flex-direction:column;gap:11px}
+  .sugg{display:flex;gap:11px;align-items:flex-start}
+  .sugg .n{width:22px;height:22px;border-radius:7px;background:var(--pos-soft);color:var(--brand);
+    display:grid;place-items:center;font-size:12px;font-weight:700;flex:none;margin-top:1px}
+  .sugg .t{font-weight:600;font-size:13.5px}
+  .sugg .s{color:var(--muted);font-size:13px;margin-top:1px}
+  .moment .where{font-size:11.5px;color:var(--faint);margin-top:6px;display:flex;align-items:center;gap:5px}
 
   .hide{display:none!important}
   :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
@@ -287,8 +296,11 @@
         <div class="card">
           <span class="eyebrow">This week</span>
           <div class="balance" style="margin-top:12px">
-            <div class="big num" id="me-balnum">—</div>
+            <div class="big num" id="me-index" tabindex="0">—</div>
             <div style="flex:1">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+                <b id="me-indexlbl" style="color:var(--ink)">Respect Index</b> · same scale your team is measured on
+              </div>
               <div class="split" id="me-split"></div>
               <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px">
                 <span id="me-poslbl">respectful</span><span id="me-neglbl">to work on</span>
@@ -296,7 +308,7 @@
             </div>
           </div>
           <div id="me-trendwrap" class="hide" style="margin-top:16px">
-            <span class="eyebrow">Balance trend · respectful − to-work-on</span>
+            <span class="eyebrow">Respect Index trend · per run, 0–100</span>
             <svg class="spark" id="me-spark" viewBox="0 0 320 44" preserveAspectRatio="none" style="margin-top:6px"></svg>
           </div>
         </div>
@@ -312,7 +324,12 @@
       <div class="tiles" style="margin-top:16px" id="me-tiles"></div>
 
       <div class="card" style="margin-top:16px">
-        <div class="cardhead"><div><h3>Recent moments</h3><div class="sub">The exact words, with a more respectful way to say the hard ones</div></div></div>
+        <div class="cardhead"><div><h3>Ways to improve</h3><div class="sub">Specific options based on your recent moments — not a grade</div></div></div>
+        <div class="suggest" id="me-suggest"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="cardhead"><div><h3>Recent moments</h3><div class="sub">The exact words, where they were said, why they were flagged — and a more respectful way to say the hard ones</div></div></div>
         <div class="moments" id="me-moments"></div>
       </div>
     </div>
@@ -327,46 +344,62 @@
   // ---------- Sample data (mirrors prototype/sample_transcripts/standup + fixture) ----------
   var POS="pos", NEG="neg";
   var people = [
-    {name:"Sam Ortiz", you:true, team:"Platform", pos:4, neg:0,
+    {name:"Sam Ortiz", you:true, team:"Platform", pos:4, neg:0, indexTrend:[80,90,100],
       goal:"Keep crediting teammates by name before you build on their idea.",
       tiles:[["Built on others",2,"good"],["Questions asked",1,"good"],["Respectful disagreement",1,"good"],["Dismissive moments",0,"good"]],
+      suggestions:[{t:"Keep it up",s:"Your recent messages land well — keep crediting people and inviting others in."}],
       moments:[
-        {b:"Acknowledgment",p:POS,why:"Referenced and built on Dana's point before adding.",q:"Good point Dana — building on that, could we also check whether the cache is stale?"},
-        {b:"Question-asking",p:POS,why:"Invited investigation instead of asserting.",q:"could we also check whether the cache is stale?"},
-        {b:"Credit &amp; attribution",p:POS,why:"Named whose option it was before extending it.",q:"Lena raised a good option though — want me to draft the rollback plan?"},
-        {b:"Enabling",p:POS,why:"Offered concrete help to move things forward.",q:"want me to draft the rollback plan so we have it ready?"}
+        {b:"Acknowledgment",p:POS,why:"Referenced and built on Dana's point before adding.",where:"#eng-standup · message 2",q:"Good point Dana — building on that, could we also check whether the cache is stale?"},
+        {b:"Question-asking",p:POS,why:"Invited investigation instead of asserting.",where:"#eng-standup · message 2",q:"could we also check whether the cache is stale?"},
+        {b:"Credit &amp; attribution",p:POS,why:"Named whose option it was before extending it.",where:"#eng-standup · message 6",q:"Lena raised a good option though — want me to draft the rollback plan?"},
+        {b:"Enabling",p:POS,why:"Offered concrete help to move things forward.",where:"#eng-standup · message 6",q:"want me to draft the rollback plan so we have it ready?"}
       ]},
-    {name:"Dana Cole", team:"Platform", pos:0, neg:2,
+    {name:"Dana Cole", team:"Platform", pos:0, neg:2, indexTrend:[40,0],
       goal:"Swap “obviously / as I said” for a plain restatement — assume good faith.",
       tiles:[["Built on others",0,"warn"],["Questions asked",0,"warn"],["Respectful disagreement",0,"mut"],["Dismissive moments",2,"bad"]],
+      suggestions:[
+        {t:"Drop the minimizers",s:"Swap “obviously / as I said” for a plain restatement — assume good faith."},
+        {t:"Ask before asserting",s:"Ask one genuine question before pushing back — curiosity over a verdict."},
+        {t:"Build on others",s:"Reference what someone said before adding your point."}
+      ],
       moments:[
-        {b:"Dismissiveness",p:NEG,why:"“already explained” + “obviously” implies others weren’t listening.",q:"I already explained this last week. It's obviously a config issue, not a code one.",
+        {b:"Dismissiveness",p:NEG,why:"“already explained” + “obviously” implies others weren’t listening.",where:"#eng-standup · message 1",q:"I already explained this last week. It's obviously a config issue, not a code one.",
           rw:"I think this comes down to config rather than code — here's the part I flagged last week, in case it helps."},
-        {b:"Dismissiveness",p:NEG,why:"“anyone knows” frames disagreement as ignorance and excludes newer teammates.",q:"Anyone who's worked here long enough knows we never roll back on a Friday.",
+        {b:"Dismissiveness",p:NEG,why:"“anyone knows” frames disagreement as ignorance and excludes newer teammates.",where:"#eng-standup · message 4",q:"Anyone who's worked here long enough knows we never roll back on a Friday.",
           rw:"I'd avoid rolling back on a Friday — we've been burned before. Worth saying why, for folks who are newer."}
       ]},
-    {name:"Priya Shah", team:"Platform", pos:2, neg:0,
+    {name:"Priya Shah", team:"Platform", pos:2, neg:0, indexTrend:[90,100],
       goal:"You disagree well — try inviting one quieter voice in each review.",
       tiles:[["Built on others",0,"mut"],["Questions asked",0,"mut"],["Respectful disagreement",1,"good"],["Dismissive moments",0,"good"]],
+      suggestions:[
+        {t:"Make room",s:"Invite a quieter voice in — “what does everyone think?”"},
+        {t:"Keep it up",s:"You disagree with dignity — a rare strength. Keep giving the concrete reason."}
+      ],
       moments:[
-        {b:"Disagree with dignity",p:POS,why:"Pushed back on the idea with a concrete reason — no jab at the person.",q:"That won't work for the EU region though, because the config there is read-only at runtime."},
-        {b:"Enabling",p:POS,why:"Offered a path that unblocks a teammate.",q:"Here's how we can unblock Marcus: I can grant temporary platform access."}
+        {b:"Disagree with dignity",p:POS,why:"Pushed back on the idea with a concrete reason — no jab at the person.",where:"#eng-standup · message 3",q:"That won't work for the EU region though, because the config there is read-only at runtime."},
+        {b:"Enabling",p:POS,why:"Offered a path that unblocks a teammate.",where:"#eng-standup · message 5",q:"Here's how we can unblock Marcus: I can grant temporary platform access."}
       ]},
-    {name:"Marcus Reed", team:"Platform", pos:0, neg:2,
+    {name:"Marcus Reed", team:"Platform", pos:0, neg:2, indexTrend:[50,0],
       goal:"When something isn’t yours, hand off with a next step instead of a wall.",
       tiles:[["Built on others",0,"mut"],["Questions asked",0,"mut"],["Respectful disagreement",0,"warn"],["Dismissive moments",2,"bad"]],
+      suggestions:[
+        {t:"Attack the idea, not the person",s:"Name the specific concern (“I don't think access is the bottleneck”), not the person."},
+        {t:"Hand off with a next step",s:"When something isn't yours, point to the right owner instead of a wall."},
+        {t:"Ask before asserting",s:"Ask one genuine question before pushing back — curiosity over a verdict."}
+      ],
       moments:[
-        {b:"Gatekeeping",p:NEG,why:"Blocked with territory/process instead of a way forward.",q:"Not my job to fix the deploy pipeline, you'll have to file a ticket with platform.",
+        {b:"Gatekeeping",p:NEG,why:"Blocked with territory/process instead of a way forward.",where:"#eng-standup · message 7",q:"Not my job to fix the deploy pipeline, you'll have to file a ticket with platform.",
           rw:"That's owned by platform, but I can point you to the right person and help frame the ticket so it moves fast."},
-        {b:"Personal attack",p:NEG,why:"Labelled the person’s view rather than addressing the idea.",q:"That's a naive take, Priya — access isn't the bottleneck, the approval chain is.",
+        {b:"Personal attack",p:NEG,why:"Labelled the person’s view rather than addressing the idea.",where:"#eng-standup · message 8",q:"That's a naive take, Priya — access isn't the bottleneck, the approval chain is.",
           rw:"I don't think access is the real bottleneck, Priya — I think it's the approval chain. Can we look at that?"}
       ]},
-    {name:"Lena Fox", team:"Platform", pos:2, neg:0,
+    {name:"Lena Fox", team:"Platform", pos:2, neg:0, indexTrend:[100,100],
       goal:"Keep making room for others — it’s lifting the whole room’s Respect Index.",
       tiles:[["Built on others",1,"good"],["Questions asked",1,"good"],["Respectful disagreement",0,"mut"],["Dismissive moments",0,"good"]],
+      suggestions:[{t:"Keep it up",s:"You make room for others and credit their ideas — keep it going."}],
       moments:[
-        {b:"Invites others",p:POS,why:"Explicitly made room for the group to weigh in.",q:"What does everyone think — should we roll back first and debug after?"},
-        {b:"Credit &amp; attribution",p:POS,why:"Named whose idea it was and credited it.",q:"Thanks Priya, that's the idea I was missing. Let's go with your access approach."}
+        {b:"Invites others",p:POS,why:"Explicitly made room for the group to weigh in.",where:"#eng-standup · message 9",q:"What does everyone think — should we roll back first and debug after?"},
+        {b:"Credit &amp; attribution",p:POS,why:"Named whose idea it was and credited it.",where:"#eng-standup · message 10",q:"Thanks Priya, that's the idea I was missing. Let's go with your access approach."}
       ]}
   ];
 
@@ -396,6 +429,16 @@
   var $=function(s,r){return (r||document).querySelector(s)};
   var el=function(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
   function idxColor(v){ if(v==null)return "var(--neutral)"; return v>=70?"var(--pos)":v>=55?"#c9a227":"var(--neg)"; }
+  // Same Respect Index formula as the backend (score.respect_index): one scale everywhere.
+  function respectIndex(pos,neg){ var t=pos+neg; if(!t)return 75;
+    return Math.round(Math.max(0,Math.min(100,50+50*(pos-neg)/t))); }
+  // Fallback coaching when the backend didn't supply suggestions (standalone/demo).
+  function deriveSuggestions(p){
+    var out=[];
+    p.moments.forEach(function(m){ if(m.p===NEG && m.rw) out.push({t:"Rework: "+m.b, s:m.rw}); });
+    if(!out.length) out.push({t:"Keep it up", s:"Your recent messages land well — keep it going."});
+    return out.slice(0,3);
+  }
 
   // ---------- Gauge (semicircle) ----------
   function drawGauge(v){
@@ -407,7 +450,7 @@
       +'<path d="'+arc(0,1)+'" fill="none" stroke="var(--surface-2)" stroke-width="'+sw+'" stroke-linecap="round"/>'
       +'<path d="'+arc(0,frac)+'" fill="none" stroke="'+idxColor(v)+'" stroke-width="'+sw+'" stroke-linecap="round"/>'
       +'</svg>'
-      +'<div class="val"><b class="num">'+v+'</b><i>out of 100</i></div>';
+      +'<div class="val" data-tip="Respect Index '+v+'/100 — one measure of respectful, listening behavior across the org. Basis: 50 + 50 × (respectful − disrespectful) ÷ total flagged behaviors, weighted across k-anonymous teams; 75 when nothing is flagged."><b class="num">'+v+'</b><i>out of 100</i></div>';
     g.innerHTML=svg;
   }
 
@@ -435,6 +478,7 @@
       var good=dir==="good";
       var color=good?"var(--pos)":"var(--neg)";
       var tile=el("div","tile");
+      tile.setAttribute("data-tip",name+": "+val+(unit||"")+" — "+hint+". Basis: aggregated from this week's flagged behaviors across k-anonymous teams.");
       tile.innerHTML='<div class="k"><span class="dot" style="background:'+color+'"></span>'+name+'</div>'
         +'<div class="v num">'+val+'<small>'+(unit||"")+'</small></div>'
         +'<div class="meter"><i style="width:'+pct+'%;background:'+color+'"></i></div>'
@@ -465,8 +509,8 @@
       var name=t[0],ppl=t[1],idx=t[2],col=t[3];
       var tr=el("tr");
       var cell = idx==null
-        ? '<span class="supp">— suppressed (&lt;5)</span>'
-        : '<span class="idxchip"><span class="teamdot" style="background:'+idxColor(idx)+'"></span><span class="num">'+idx+'</span></span>';
+        ? '<span class="supp" data-tip="Suppressed for k-anonymity — this team has fewer than 5 opted-in people, so no reading could be traced to one person.">— suppressed (&lt;5)</span>'
+        : '<span class="idxchip" data-tip="Respect Index '+idx+'/100 for '+name+' ('+ppl+' people) — the same 0–100 scale as every other team and every individual mirror."><span class="teamdot" style="background:'+idxColor(idx)+'"></span><span class="num">'+idx+'</span></span>';
       tr.innerHTML='<td><span class="teamdot" style="display:inline-block;margin-right:8px;background:'+col+'"></span>'+name+'</td>'
         +'<td class="r num">'+ppl+'</td><td class="r">'+cell+'</td>';
       tb.appendChild(tr);
@@ -478,7 +522,13 @@
     var p=people[idx];
     $("#me-sub").textContent = (p.you?"This is your mirror. ":"Viewing "+p.name+"’s mirror (demo). ")+"Your leaders and teammates cannot see this.";
     var total=p.pos+p.neg;
-    $("#me-balnum").textContent=p.pos+" : "+p.neg;
+    var pidx=(p.index!=null)?p.index:respectIndex(p.pos,p.neg);
+    var mi=$("#me-index");
+    mi.textContent=pidx;
+    mi.style.color=idxColor(pidx);
+    mi.setAttribute("data-tip","Respect Index "+pidx+"/100 — the same scale your team is measured on. "
+      +"Basis: 50 + 50 × (respectful − to-work-on) ÷ total; 75 when nothing is flagged. "
+      +"This week you had "+p.pos+" respectful and "+p.neg+" to-work-on moments (see below).");
     $("#me-poslbl").textContent=p.pos+" respectful";
     $("#me-neglbl").textContent=p.neg+" to work on";
     var split=$("#me-split"); split.innerHTML="";
@@ -492,10 +542,20 @@
     p.tiles.forEach(function(t){
       var color=cmap[t[2]];
       var tile=el("div","tile");
+      tile.setAttribute("data-tip",t[0]+": "+t[1]+" this week — counted from your flagged moments listed below.");
       tile.innerHTML='<div class="k"><span class="dot" style="background:'+color+'"></span>'+t[0]+'</div>'
         +'<div class="v num">'+t[1]+'</div>'
         +'<div class="meter"><i style="width:'+Math.min(100,t[1]*33+8)+'%;background:'+color+'"></i></div>';
       tw.appendChild(tile);
+    });
+
+    // Ways to improve — specific options, backend-supplied or derived from moments.
+    var sg=$("#me-suggest"); sg.innerHTML="";
+    var sugg=(p.suggestions&&p.suggestions.length)?p.suggestions:deriveSuggestions(p);
+    sugg.forEach(function(s,n){
+      var row=el("div","sugg");
+      row.innerHTML='<span class="n">'+(n+1)+'</span><div><div class="t">'+s.t+'</div><div class="s">'+s.s+'</div></div>';
+      sg.appendChild(row);
     });
 
     var mm=$("#me-moments"); mm.innerHTML="";
@@ -505,13 +565,15 @@
       var html='<div class="top"><span class="chip '+cls+'">'+(m.p===POS?"✓":"!")+' '+m.b+'</span>'
         +'<span class="why">'+m.why+'</span></div>'
         +'<blockquote class="quote">“'+m.q+'”</blockquote>';
+      if(m.where)html+='<div class="where">◦ caught in '+m.where+'</div>';
       if(m.rw)html+='<div class="rewrite"><b>A more respectful way to say it</b>'+m.rw+'</div>';
       node.innerHTML=html;
       mm.appendChild(node);
     });
 
     var tw2=$("#me-trendwrap");
-    if(p.trend&&p.trend.length>1){ tw2.classList.remove("hide"); drawSpark("#me-spark",p.trend); }
+    var series=p.indexTrend||[];
+    if(series.length>1){ tw2.classList.remove("hide"); drawSpark("#me-spark",series); }
     else{ tw2.classList.add("hide"); }
   }
 
@@ -533,15 +595,28 @@
     $("#ctx").textContent = v==="org" ? "· Organization overview" : "· My mirror";
   });
 
-  // ---------- Tooltip for sparkline ----------
+  // ---------- Tooltips: sparkline points + any [data-tip] element ----------
   var tt=$("#tt");
-  document.addEventListener("mouseover",function(e){
-    var c=e.target.closest(".sp"); if(!c)return;
-    tt.textContent="Respect Index "+c.getAttribute("data-v");
-    var r=c.getBoundingClientRect();
-    tt.style.left=(r.left+r.width/2)+"px"; tt.style.top=(r.top-4)+"px"; tt.style.opacity="1";
-  });
-  document.addEventListener("mouseout",function(e){ if(e.target.closest(".sp"))tt.style.opacity="0"; });
+  function showTip(target,text){
+    tt.textContent=text;
+    var r=target.getBoundingClientRect();
+    tt.style.left=(r.left+r.width/2)+"px";
+    tt.style.top=(r.top-6)+"px";
+    tt.style.opacity="1";
+  }
+  function hideTip(){ tt.style.opacity="0"; }
+  function tipFor(node){
+    var c=node.closest(".sp");
+    if(c) return {el:c, text:"Respect Index "+c.getAttribute("data-v")};
+    var d=node.closest("[data-tip]");
+    if(d) return {el:d, text:d.getAttribute("data-tip")};
+    return null;
+  }
+  document.addEventListener("mouseover",function(e){ var t=tipFor(e.target); if(t)showTip(t.el,t.text); });
+  document.addEventListener("mouseout",function(e){ if(tipFor(e.target))hideTip(); });
+  // Keyboard accessibility: focusable tips (e.g. the mirror index) show on focus.
+  document.addEventListener("focusin",function(e){ var t=tipFor(e.target); if(t)showTip(t.el,t.text); });
+  document.addEventListener("focusout",function(e){ if(tipFor(e.target))hideTip(); });
 
   // ---------- Theme toggle ----------
   var root=document.documentElement, tbtn=$("#theme");

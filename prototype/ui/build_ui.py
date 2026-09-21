@@ -144,27 +144,32 @@ def build(db_path):
             continue
         last = timeline[-1]
         latest_run_id = last["id"]
+        ch = last["channel"]
         p_pos = last["respectful"] or 0
         p_neg = last["disrespectful"] or 0
         pcounts = defaultdict(int)
         moments = []
         for f in conn.execute(
-            "SELECT behavior, polarity, evidence, coaching_rewrite, rationale "
-            "FROM findings WHERE run_id=? AND author_id=? ORDER BY id", (latest_run_id, author_id)
+            "SELECT behavior, polarity, evidence, coaching_rewrite, rationale, message_index "
+            "FROM findings WHERE run_id=? AND author_id=? ORDER BY message_index, id",
+            (latest_run_id, author_id)
         ):
             pcounts[f["behavior"]] += 1
             m = {"b": LABEL.get(f["behavior"], f["behavior"]),
                  "p": "pos" if f["polarity"] == "respectful" else "neg",
-                 "why": f["rationale"], "q": f["evidence"]}
+                 "why": f["rationale"], "q": f["evidence"],
+                 # where in the conversation this was caught — the channel + message position
+                 "where": f'{ch} · message {(f["message_index"] or 0) + 1}'}
             if f["polarity"] == "disrespectful" and f["coaching_rewrite"]:
                 m["rw"] = f["coaching_rewrite"]
             moments.append(m)
         goal = store.get_goal(conn, author_id)
-        ch = last["channel"]
         rough = pcounts["dismissiveness"] + pcounts["personal_attack"] + pcounts["gatekeeping"]
         people.append({
             "name": name, "you": name == YOU, "team": team_of(ch)[0],
             "pos": p_pos, "neg": p_neg,
+            # Same 0–100 Respect Index the org/teams use — one scale everywhere.
+            "index": respect_index(_fake({"pos": p_pos, "neg": p_neg})),
             "goal": goal["goal"] if goal else "Pick one thing to focus on this week.",
             "tiles": [
                 ["Built on others", pcounts["acknowledgment"], "good" if pcounts["acknowledgment"] else "mut"],
@@ -173,11 +178,14 @@ def build(db_path):
                 ["Rough moments", rough, "bad" if rough else "good"],
             ],
             "moments": moments,
-            # trend = net balance (respectful − to-work-on) per run, chronological
-            "trend": [(t["respectful"] or 0) - (t["disrespectful"] or 0) for t in timeline],
+            "suggestions": _suggestions(pcounts),
+            # Respect Index per run, chronological — same scale as the headline number.
+            "indexTrend": [respect_index(_fake({"pos": t["respectful"] or 0,
+                                                "neg": t["disrespectful"] or 0}))
+                           for t in timeline],
         })
-    # 'You' first, then most-respectful.
-    people.sort(key=lambda p: (not p["you"], -(p["pos"] - p["neg"])))
+    # 'You' first, then most-respectful (by the shared index).
+    people.sort(key=lambda p: (not p["you"], -p["index"]))
 
     conn.close()
     return {"org": org, "people": people}
@@ -190,6 +198,35 @@ def _fake(t):
 
 def store_neg():
     return {"dismissiveness", "personal_attack", "gatekeeping"}
+
+
+# Concrete, behavior-specific coaching. Each rule fires from the person's own
+# behavior counts, so the advice points at what actually showed up (or what's
+# missing). Negatives first (most actionable), then gaps, capped at 3.
+def _suggestions(pcounts: dict) -> list[dict]:
+    out = []
+    if pcounts.get("dismissiveness"):
+        out.append({"t": "Drop the minimizers",
+                    "s": "Swap “obviously / as I said” for a plain restatement — assume good faith."})
+    if pcounts.get("personal_attack"):
+        out.append({"t": "Attack the idea, not the person",
+                    "s": "Name the specific concern (“I don't think access is the bottleneck”), not the person."})
+    if pcounts.get("gatekeeping"):
+        out.append({"t": "Hand off with a next step",
+                    "s": "When something isn't yours, point to the right owner instead of a wall."})
+    if len(out) < 3 and not pcounts.get("question_asking"):
+        out.append({"t": "Ask before asserting",
+                    "s": "Ask one genuine question before pushing back — curiosity over a verdict."})
+    if len(out) < 3 and not pcounts.get("acknowledgment"):
+        out.append({"t": "Build on others",
+                    "s": "Reference what someone said before adding your point."})
+    if len(out) < 3 and not pcounts.get("invites_others"):
+        out.append({"t": "Make room",
+                    "s": "Invite a quieter voice in — “what does everyone think?”"})
+    if not out:  # nothing to fix — reinforce, don't invent a problem
+        out.append({"t": "Keep it up",
+                    "s": "Your recent messages land well — keep crediting people and inviting others in."})
+    return out[:3]
 
 
 def pct(a, b):

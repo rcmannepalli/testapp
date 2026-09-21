@@ -25,6 +25,7 @@ import os
 import sys
 
 import store
+from score import respect_index
 
 PALETTE = {
     "bg": "#F4F1EA", "card": "#FFFFFF", "ink": "#2B2A26", "muted": "#7A756B",
@@ -125,6 +126,7 @@ def render_page(author: str, findings: list[dict], timeline: list[dict],
                 goal: dict | None) -> str:
     pos = sum(1 for f in findings if f["polarity"] == "respectful")
     neg = sum(1 for f in findings if f["polarity"] == "disrespectful")
+    idx = respect_index(findings)
     p = PALETTE
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -149,6 +151,7 @@ def render_page(author: str, findings: list[dict], timeline: list[dict],
   .summary {{ display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }}
   .bignum {{ font-size: 40px; font-weight: 700; line-height: 1; }}
   .bignum.good {{ color: {p['good']}; }} .bignum.warn {{ color: {p['warn']}; }}
+  .bignum.index {{ color: {p['accent']}; }}
   .bignum small {{ display: block; font-size: 13px; font-weight: 400;
     color: {p['muted']}; font-style: italic; margin-top: 4px; }}
   .bar {{ display: flex; height: 14px; border-radius: 7px; overflow: hidden;
@@ -204,6 +207,7 @@ def render_page(author: str, findings: list[dict], timeline: list[dict],
   {goal_html(goal, author)}
 
   <div class="card summary">
+    <div class="bignum index" title="Respect Index — the same 0–100 scale your team is measured on. 50 + 50×(landing well − worth a look) ÷ total; 75 when nothing is flagged.">{idx}<small>/ 100 Respect Index · same scale your team sees</small></div>
     <div class="bignum good">{pos}<small>landing well</small></div>
     <div class="bignum warn">{neg}<small>worth a look</small></div>
     <div style="flex:1; min-width:160px">{balance_bar(pos, neg)}</div>
