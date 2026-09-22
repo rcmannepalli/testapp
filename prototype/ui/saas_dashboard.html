@@ -13,18 +13,9 @@
     --serif:"Palatino Linotype",Palatino,"Iowan Old Style","Book Antiqua",Georgia,serif;
     --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
-  @media (prefers-color-scheme:dark){
-    :root{
-      --paper:#111412; --surface:#1b1f1d; --surface-2:#21261f; --surface-2:#212623;
-      --ink:#e9efec; --muted:#9aa6a0; --faint:#6f7c76;
-      --line:#2b312d; --line-2:#353c37;
-      --brand:#34c48d; --brand-ink:#5fd6a6; --accent:#eab24e;
-      --pos:#2bbd86; --pos-soft:#2bbd862e;
-      --neg:#e0774a; --neg-soft:#e0774a2e;
-      --neutral:#5b655f;
-      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.28);
-    }
-  }
+  /* Dark palette applies ONLY when the viewer explicitly toggles it
+     (:root[data-theme="dark"] below). Light sage is the unconditional default,
+     so the OS/browser dark-mode preference never overrides the brand look. */
   :root[data-theme="light"]{
     --paper:#eef1ef; --surface:#ffffff; --surface-2:#f6f8f7;
     --ink:#17211d; --muted:#5c6b65; --faint:#8b968f;
