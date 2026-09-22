@@ -4,7 +4,7 @@
     --paper:#eef1ef; --surface:#ffffff; --surface-2:#f6f8f7;
     --ink:#17211d; --muted:#5c6b65; --faint:#8b968f;
     --line:#e2e7e4; --line-2:#d7ddd9;
-    --brand:#1f7a55; --brand-ink:#16613f; --accent:#caa018;
+    --brand:#1f7a55; --brand-ink:#16613f; --accent:#e19a25;
     --pos:#12a06b; --pos-soft:#12a06b26;
     --neg:#c4522a; --neg-soft:#c4522a26;
     --neutral:#aeb6b2;
@@ -18,7 +18,7 @@
       --paper:#111412; --surface:#1b1f1d; --surface-2:#21261f; --surface-2:#212623;
       --ink:#e9efec; --muted:#9aa6a0; --faint:#6f7c76;
       --line:#2b312d; --line-2:#353c37;
-      --brand:#34c48d; --brand-ink:#5fd6a6; --accent:#e0c04a;
+      --brand:#34c48d; --brand-ink:#5fd6a6; --accent:#eab24e;
       --pos:#2bbd86; --pos-soft:#2bbd862e;
       --neg:#e0774a; --neg-soft:#e0774a2e;
       --neutral:#5b655f;
@@ -29,7 +29,7 @@
     --paper:#eef1ef; --surface:#ffffff; --surface-2:#f6f8f7;
     --ink:#17211d; --muted:#5c6b65; --faint:#8b968f;
     --line:#e2e7e4; --line-2:#d7ddd9;
-    --brand:#1f7a55; --brand-ink:#16613f; --accent:#caa018;
+    --brand:#1f7a55; --brand-ink:#16613f; --accent:#e19a25;
     --pos:#12a06b; --pos-soft:#12a06b26;
     --neg:#c4522a; --neg-soft:#c4522a26;
     --neutral:#aeb6b2;
@@ -547,14 +547,14 @@
   var $=function(s,r){return (r||document).querySelector(s)};
   var el=function(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
   function escAttr(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-  function idxColor(v){ if(v==null)return "var(--neutral)"; return v>=70?"var(--pos)":v>=55?"#c9a227":"var(--neg)"; }
+  function idxColor(v){ if(v==null)return "var(--neutral)"; return v>=70?"var(--pos)":v>=55?"#e19a25":"var(--neg)"; }
   // Same Respect Index formula as the backend (score.respect_index): one scale everywhere.
   function respectIndex(pos,neg){ var t=pos+neg; if(!t)return 75;
     return Math.round(Math.max(0,Math.min(100,50+50*(pos-neg)/t))); }
   // Display scale: map the 0–100 index onto a 1–5 rating (score.to_rating).
   function toRating(index){ return Math.round((1+index/25)*10)/10; }
   function starStr(rating){ var r=Math.round(rating), s=""; for(var i=1;i<=5;i++) s+=(i<=r?"★":"☆"); return s; }
-  function rateColor(rating){ return rating>=3.8?"var(--pos)":rating>=3.0?"#c9a227":"var(--neg)"; }
+  function rateColor(rating){ return rating>=3.8?"var(--pos)":rating>=3.0?"#e19a25":"var(--neg)"; }
   // Behavior (display label) → area of growth + why. Used for the "area of growth" panel.
   var GROWTH={
     "Dismissiveness":["Listening without minimizing","Restate what others said instead of waving it off with “obviously” / “as I said”."],
@@ -752,7 +752,7 @@
     $("#me-goal").textContent=p.goal;
 
     var tw=$("#me-tiles"); tw.innerHTML="";
-    var cmap={good:"var(--pos)",bad:"var(--neg)",warn:"#c9a227",mut:"var(--neutral)"};
+    var cmap={good:"var(--pos)",bad:"var(--neg)",warn:"#e19a25",mut:"var(--neutral)"};
     p.tiles.forEach(function(t){
       var color=cmap[t[2]];
       var tile=el("div","tile");
