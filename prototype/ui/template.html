@@ -1,14 +1,14 @@
 <title>Lensward — Respect &amp; Listening Dashboard</title>
 <style>
   :root{
-    --paper:#eef1ef; --surface:#ffffff; --surface-2:#f6f8f7;
-    --ink:#17211d; --muted:#5c6b65; --faint:#8b968f;
-    --line:#e2e7e4; --line-2:#d7ddd9;
-    --brand:#1f7a55; --brand-ink:#16613f; --accent:#e19a25;
-    --pos:#12a06b; --pos-soft:#12a06b26;
-    --neg:#c4522a; --neg-soft:#c4522a26;
-    --neutral:#aeb6b2;
-    --shadow:0 1px 2px rgba(20,40,33,.04),0 6px 20px rgba(20,40,33,.06);
+    --paper:#eaf1f2; --surface:#ffffff; --surface-2:#f1f7f7;
+    --ink:#10262c; --muted:#4f6a6f; --faint:#86999c;
+    --line:#dce8e8; --line-2:#cddddd;
+    --brand:#0c6e88; --brand-ink:#084f63; --accent:#d0a02e;
+    --pos:#0e9d7d; --pos-soft:#0e9d7d26;
+    --neg:#c15a2b; --neg-soft:#c15a2b26;
+    --neutral:#a2b3b3;
+    --shadow:0 1px 2px rgba(12,40,48,.05),0 6px 20px rgba(12,40,48,.07);
     --r:14px; --r-sm:10px;
     --serif:"Palatino Linotype",Palatino,"Iowan Old Style","Book Antiqua",Georgia,serif;
     --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -17,23 +17,23 @@
      (:root[data-theme="dark"] below). Light sage is the unconditional default,
      so the OS/browser dark-mode preference never overrides the brand look. */
   :root[data-theme="light"]{
-    --paper:#eef1ef; --surface:#ffffff; --surface-2:#f6f8f7;
-    --ink:#17211d; --muted:#5c6b65; --faint:#8b968f;
-    --line:#e2e7e4; --line-2:#d7ddd9;
-    --brand:#1f7a55; --brand-ink:#16613f; --accent:#e19a25;
-    --pos:#12a06b; --pos-soft:#12a06b26;
-    --neg:#c4522a; --neg-soft:#c4522a26;
-    --neutral:#aeb6b2;
-    --shadow:0 1px 2px rgba(20,40,33,.04),0 6px 20px rgba(20,40,33,.06);
+    --paper:#eaf1f2; --surface:#ffffff; --surface-2:#f1f7f7;
+    --ink:#10262c; --muted:#4f6a6f; --faint:#86999c;
+    --line:#dce8e8; --line-2:#cddddd;
+    --brand:#0c6e88; --brand-ink:#084f63; --accent:#d0a02e;
+    --pos:#0e9d7d; --pos-soft:#0e9d7d26;
+    --neg:#c15a2b; --neg-soft:#c15a2b26;
+    --neutral:#a2b3b3;
+    --shadow:0 1px 2px rgba(12,40,48,.05),0 6px 20px rgba(12,40,48,.07);
   }
   :root[data-theme="dark"]{
-    --paper:#111412; --surface:#1b1f1d; --surface-2:#212623;
-    --ink:#e9efec; --muted:#9aa6a0; --faint:#6f7c76;
-    --line:#2b312d; --line-2:#353c37;
-    --brand:#4fbf9f; --brand-ink:#7fd3bb;
-    --pos:#22a07e; --pos-soft:#22a07e2e;
-    --neg:#d26a3e; --neg-soft:#d26a3e2e;
-    --neutral:#5b655f;
+    --paper:#0c1416; --surface:#131e21; --surface-2:#1a262a;
+    --ink:#e6f0f0; --muted:#97abac; --faint:#6d8082;
+    --line:#263438; --line-2:#32444a;
+    --brand:#37a8c6; --brand-ink:#66c6dd; --accent:#e6be54;
+    --pos:#24c19a; --pos-soft:#24c19a2e;
+    --neg:#e27a48; --neg-soft:#e27a482e;
+    --neutral:#5a6a6c;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.28);
   }
   *{box-sizing:border-box}
@@ -505,7 +505,7 @@
       ["Dismissiveness",NEG,5],["Gatekeeping",NEG,3],["Personal attack",NEG,2]
     ],
     teams:[
-      ["Growth",7,82,"#12a06b"],["Platform",5,67,"#1f7a55"],["Design",3,null,"#c4522a"]
+      ["Growth",7,82,"#0e9d7d"],["Platform",5,67,"#0c6e88"],["Design",3,null,"#c15a2b"]
     ],
     behaviorDefs:{
       "Acknowledgment":"References or builds on what someone else said before responding.",
@@ -539,14 +539,14 @@
   var $=function(s,r){return (r||document).querySelector(s)};
   var el=function(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
   function escAttr(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-  function idxColor(v){ if(v==null)return "var(--neutral)"; return v>=70?"var(--pos)":v>=55?"#e19a25":"var(--neg)"; }
+  function idxColor(v){ if(v==null)return "var(--neutral)"; return v>=70?"var(--pos)":v>=55?"#d0a02e":"var(--neg)"; }
   // Same Respect Index formula as the backend (score.respect_index): one scale everywhere.
   function respectIndex(pos,neg){ var t=pos+neg; if(!t)return 75;
     return Math.round(Math.max(0,Math.min(100,50+50*(pos-neg)/t))); }
   // Display scale: map the 0–100 index onto a 1–5 rating (score.to_rating).
   function toRating(index){ return Math.round((1+index/25)*10)/10; }
   function starStr(rating){ var r=Math.round(rating), s=""; for(var i=1;i<=5;i++) s+=(i<=r?"★":"☆"); return s; }
-  function rateColor(rating){ return rating>=3.8?"var(--pos)":rating>=3.0?"#e19a25":"var(--neg)"; }
+  function rateColor(rating){ return rating>=3.8?"var(--pos)":rating>=3.0?"#d0a02e":"var(--neg)"; }
   // Behavior (display label) → area of growth + why. Used for the "area of growth" panel.
   var GROWTH={
     "Dismissiveness":["Listening without minimizing","Restate what others said instead of waving it off with “obviously” / “as I said”."],
@@ -744,7 +744,7 @@
     $("#me-goal").textContent=p.goal;
 
     var tw=$("#me-tiles"); tw.innerHTML="";
-    var cmap={good:"var(--pos)",bad:"var(--neg)",warn:"#e19a25",mut:"var(--neutral)"};
+    var cmap={good:"var(--pos)",bad:"var(--neg)",warn:"#d0a02e",mut:"var(--neutral)"};
     p.tiles.forEach(function(t){
       var color=cmap[t[2]];
       var tile=el("div","tile");

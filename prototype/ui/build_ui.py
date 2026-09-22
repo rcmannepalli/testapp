@@ -28,9 +28,9 @@ from rubric import BEHAVIORS  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 TEAMS = {  # channel → (display name, dot color)
-    "#eng-standup": ("Platform", "#1f7a55"),
-    "#growth-sync": ("Growth", "#12a06b"),
-    "#design-crit": ("Design", "#c4522a"),
+    "#eng-standup": ("Platform", "#0c6e88"),
+    "#growth-sync": ("Growth", "#0e9d7d"),
+    "#design-crit": ("Design", "#c15a2b"),
 }
 LABEL = {
     "acknowledgment": "Acknowledgment", "question_asking": "Question-asking",
