@@ -213,6 +213,39 @@
   .brow-detail .bd-def{color:var(--ink)}
 
   .hide{display:none!important}
+
+  /* ---- Coach (virtual assistant) ---- */
+  .asst-btn{position:fixed;right:22px;bottom:22px;z-index:40;display:flex;align-items:center;gap:9px;
+    padding:11px 16px 11px 13px;border:0;border-radius:999px;background:var(--brand);color:#fff;
+    font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(20,40,33,.28)}
+  .asst-btn:hover{filter:brightness(1.06)}
+  .asst-btn svg{width:18px;height:18px}
+  .asst-panel{position:fixed;right:22px;bottom:22px;z-index:41;width:min(390px,calc(100vw - 32px));
+    height:min(560px,calc(100vh - 40px));display:flex;flex-direction:column;background:var(--surface);
+    border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 60px rgba(20,40,33,.32);overflow:hidden}
+  .asst-head{display:flex;align-items:center;gap:8px;padding:13px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+  .asst-head .ic{width:30px;height:30px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none}
+  .asst-head .ic svg{width:17px;height:17px}
+  .asst-head b{font-size:14px;display:block}
+  .asst-head span{font-size:11.5px;color:var(--muted)}
+  .asst-head .x{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:17px;width:28px;height:28px;border-radius:7px}
+  .asst-head .x:hover{background:var(--line);color:var(--ink)}
+  .asst-log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .amsg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .amsg.user{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:4px}
+  .amsg.bot{align-self:flex-start;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .amsg.bot.think{color:var(--muted);font-style:italic}
+  .asst-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
+  .asst-chips button{font-size:11.5px;padding:5px 9px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);color:var(--muted)}
+  .asst-chips button:hover{color:var(--ink);border-color:var(--brand)}
+  .asst-form{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+  .asst-form input{flex:1;font-family:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);
+    border:1px solid var(--line-2);border-radius:9px;padding:9px 11px}
+  .asst-form input:disabled{opacity:.6}
+  .asst-form button{border:0;border-radius:9px;background:var(--brand);color:#fff;font-weight:600;font-size:13px;padding:0 14px}
+  .asst-form button:disabled{opacity:.5}
+  .asst-foot{padding:0 14px 10px;font-size:10.5px;color:var(--faint);text-align:center}
+  @media(max-width:760px){ .asst-panel{right:8px;bottom:8px} .asst-btn{right:14px;bottom:14px} }
   :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -376,6 +409,25 @@
 </div>
 <div class="tt" id="tt"></div>
 
+<button id="asstBtn" class="asst-btn" aria-label="Open the respect coach">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg>
+  Coach
+</button>
+<div id="asstPanel" class="asst-panel hide" role="dialog" aria-label="Respect coach" aria-modal="false">
+  <div class="asst-head">
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg></div>
+    <div><b>Respect coach</b><span>ask about any score on this page</span></div>
+    <button class="x" id="asstClose" aria-label="Close">✕</button>
+  </div>
+  <div class="asst-log" id="asstLog"></div>
+  <div class="asst-chips" id="asstChips"></div>
+  <form class="asst-form" id="asstForm">
+    <input id="asstInput" autocomplete="off" placeholder="e.g. why is my rating 3.4?">
+    <button type="submit">Send</button>
+  </form>
+  <div class="asst-foot" id="asstFoot"></div>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -493,6 +545,7 @@
 
   var $=function(s,r){return (r||document).querySelector(s)};
   var el=function(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+  function escAttr(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   function idxColor(v){ if(v==null)return "var(--neutral)"; return v>=70?"var(--pos)":v>=55?"#c9a227":"var(--neg)"; }
   // Same Respect Index formula as the backend (score.respect_index): one scale everywhere.
   function respectIndex(pos,neg){ var t=pos+neg; if(!t)return 75;
@@ -565,19 +618,29 @@
   }
 
   // ---------- Sparkline ----------
-  function drawSpark(sel,data){
+  // `meta` (optional) supplies rich per-point tooltip text. The whole width is
+  // made hoverable via full-height bands, so hovering anywhere on the trend —
+  // not just the exact point — reveals how that week scored.
+  function drawSpark(sel,data,meta){
     var svg=$(sel); var w=320,h=44,pad=4;
     var mn=Math.min.apply(0,data)-2, mx=Math.max.apply(0,data)+2;
     var xs=function(i){return pad+i*(w-2*pad)/(data.length-1)};
     var ys=function(v){return h-pad-(v-mn)/(mx-mn)*(h-2*pad)};
-    var d="",area="";
+    var d="";
     data.forEach(function(v,i){d+=(i?"L":"M")+xs(i).toFixed(1)+" "+ys(v).toFixed(1)+" ";});
-    area="M"+xs(0)+" "+h+" "+d.replace(/^M/,"L")+"L"+xs(data.length-1)+" "+h+"Z";
+    var area="M"+xs(0)+" "+h+" "+d.replace(/^M/,"L")+"L"+xs(data.length-1)+" "+h+"Z";
     var last=data.length-1;
+    var bandW=w/data.length;
+    var bands=data.map(function(v,i){
+      var bx=Math.max(0,xs(i)-bandW/2);
+      var tip=(meta&&meta[i]!=null)?' data-tiptext="'+escAttr(meta[i])+'"':'';
+      return '<rect x="'+bx.toFixed(1)+'" y="0" width="'+bandW.toFixed(1)+'" height="'+h+'" fill="transparent" class="sp" tabindex="0" data-v="'+v+'"'+tip+'/>';
+    }).join("");
     svg.innerHTML='<path d="'+area+'" fill="var(--pos-soft)"/>'
       +'<path d="'+d+'" fill="none" stroke="var(--pos)" stroke-width="2" stroke-linejoin="round"/>'
+      +data.map(function(v,i){return '<circle cx="'+xs(i)+'" cy="'+ys(v)+'" r="2.4" fill="var(--pos)"/>';}).join("")
       +'<circle cx="'+xs(last)+'" cy="'+ys(data[last])+'" r="3.5" fill="var(--pos)"/>'
-      +data.map(function(v,i){return '<circle cx="'+xs(i)+'" cy="'+ys(v)+'" r="9" fill="transparent" class="sp" data-v="'+v+'"/>';}).join("");
+      +bands;
   }
 
   // ---------- Org tiles (clickable → breakdown) ----------
@@ -751,7 +814,16 @@
 
     var tw2=$("#me-trendwrap");
     var series=p.indexTrend||[];
-    if(series.length>1){ tw2.classList.remove("hide"); drawSpark("#me-spark",series); }
+    if(series.length>1){
+      tw2.classList.remove("hide");
+      var meMeta=series.map(function(v,i){
+        var dv=(i>0)?(v-series[i-1]):0;
+        return "Week "+(i+1)+" of "+series.length+" — Respect rating "+toRating(v)+"/5 ("+v+"/100)"
+          +(i>0?", "+(dv>=0?"▲ +":"▼ ")+dv+" vs prior week":", first tracked week")
+          +". Your rating reflects respectful vs. to-work-on moments that week.";
+      });
+      drawSpark("#me-spark",series,meMeta);
+    }
     else{ tw2.classList.add("hide"); }
   }
 
@@ -785,7 +857,8 @@
   function hideTip(){ tt.style.opacity="0"; }
   function tipFor(node){
     var c=node.closest(".sp");
-    if(c){ var iv=+c.getAttribute("data-v"); return {el:c, text:"Respect rating "+toRating(iv)+"/5  ("+iv+"/100)"}; }
+    if(c){ var rich=c.getAttribute("data-tiptext"); var iv=+c.getAttribute("data-v");
+           return {el:c, text: rich || ("Respect rating "+toRating(iv)+"/5  ("+iv+"/100)")}; }
     var d=node.closest("[data-tip]");
     if(d) return {el:d, text:d.getAttribute("data-tip")};
     return null;
@@ -808,10 +881,120 @@
   if(org.sub){ $("#org-sub").textContent=org.sub; }
   if(org.trendLabels){ $("#orgspark-x").innerHTML=org.trendLabels.map(function(l){return "<span>"+l+"</span>";}).join(""); }
   drawGauge(org.index);
-  drawSpark("#orgspark",org.trend);
+  var _basis="Respect Index = 50 + 50 × (respectful − to-work-on) ÷ total flagged behaviors, weighted across k-anonymous teams; shown 1–5.";
+  var orgMeta=org.trend.map(function(v,i){
+    var lbl=(org.trendLabels&&org.trendLabels[i])||("Week "+(i+1));
+    var dv=(i>0)?(v-org.trend[i-1]):0;
+    return "Week of "+lbl+" — Respect rating "+toRating(v)+"/5 ("+v+"/100)"
+      +(i>0?", "+(dv>=0?"▲ +":"▼ ")+dv+" vs prior week":", first tracked week")+". "+_basis;
+  });
+  drawSpark("#orgspark",org.trend,orgMeta);
   $("#orgdelta").textContent=(org.delta>=0?"▲ +":"▼ ")+org.delta+" vs last week";
   $("#orgdelta").className="delta "+(org.delta>=0?"up":"dn");
   renderOrgTiles(); renderBalance(); renderTeams();
   renderPerson(0);
+
+  // ---------- Coach (virtual assistant, powered by the sample capability) ----------
+  (function coach(){
+    var btn=$("#asstBtn"), panel=$("#asstPanel"), logEl=$("#asstLog"), form=$("#asstForm"),
+        input=$("#asstInput"), foot=$("#asstFoot"), chips=$("#asstChips"), closeb=$("#asstClose");
+    var sampleFn=null, wired=false, hist=[], intro=false;
+
+    function addMsg(who,text,cls){ var m=el("div","amsg "+who+(cls?" "+cls:"")); m.textContent=text; logEl.appendChild(m); logEl.scrollTop=logEl.scrollHeight; return m; }
+
+    var SUGGESTED=[
+      "Why is the Respect Index what it is?",
+      "Which behavior is hurting us most?",
+      "How do I improve my rating?"
+    ];
+    function showChips(){
+      chips.innerHTML="";
+      SUGGESTED.forEach(function(q){
+        var b=el("button",null,q); b.type="button";
+        b.addEventListener("click",function(){ if(sampleFn){ ask(q); } });
+        chips.appendChild(b);
+      });
+    }
+    function ensureIntro(){
+      if(intro) return; intro=true;
+      addMsg("bot","Hi — I can explain any number on this dashboard and suggest concrete ways to shift a behavior. Ask about the Respect Index, a specific behavior, a team, or your mirror.");
+      showChips();
+    }
+
+    // Ground every answer in what's actually on screen right now.
+    function context(){
+      var meView = !$("#view-me").classList.contains("hide");
+      var ctx={
+        view: meView ? "My Mirror (an individual's private view)" : "Organization overview (aggregate, no individuals)",
+        respectIndex: {value:org.index, rating:toRating(org.index)+"/5", delta:org.delta,
+          trend:org.trend, trendWeeks:org.trendLabels},
+        tiles: org.tiles.map(function(t){ return {metric:t[0], value:""+t[1]+(t[2]||""),
+          explanation:(t[6]&&t[6].why)||t[5]}; }),
+        behaviorBalanceThisWeek: org.balance.map(function(b){ return {behavior:b[0],
+          kind:(b[1]===POS?"respectful":"to-work-on"), count:b[2]}; }),
+        teams: org.teams.map(function(t){ return {team:t[0], people:t[1],
+          rating:(t[2]==null?"suppressed (fewer than 5 people, k-anonymity)":toRating(t[2])+"/5")}; }),
+        behaviorDefinitions: org.behaviorDefs
+      };
+      if(meView){
+        var p=people[+sel.value];
+        ctx.person={ who:(p.you?"the viewer themselves ("+p.name+")":p.name),
+          rating:toRating(p.index)+"/5", respectfulMoments:p.pos, toWorkOnMoments:p.neg, goal:p.goal,
+          moments:p.moments.map(function(m){ return {behavior:m.b, kind:(m.p===POS?"respectful":"to-work-on"),
+            theyActuallySaid:m.q, why:m.why, aMoreRespectfulVersion:m.rw||null}; }),
+          suggestions:p.suggestions };
+      }
+      return ctx;
+    }
+
+    var SYS="You are SugApp's Respect & Listening coach, embedded in a live dashboard. "
+      +"Answer ONLY from the DASHBOARD DATA below — never invent numbers, quotes, names, or teams. "
+      +"The Respect Index is 0–100, shown as a 1–5 rating: 50 + 50 × (respectful − to-work-on) ÷ total flagged behaviors. "
+      +"You measure OBSERVABLE communication behaviors, never traits, personality, or emotions. "
+      +"When asked how to improve, give 1–3 concrete, specific behavior changes tied to the person's own flagged moments, "
+      +"and prefer the 'aMoreRespectfulVersion' rewrites when they exist. "
+      +"Be warm, brief, and practical: short paragraphs or tight bullets. "
+      +"If the data doesn't contain the answer (e.g. an individual's words while in the org view), say so — the org view is aggregate and individuals' exact words stay private in their own mirror.";
+
+    async function ask(q){
+      if(!sampleFn) return;
+      addMsg("user",q);
+      var bubble=addMsg("bot","Thinking…","think");
+      var turns=[];
+      hist.slice(-4).forEach(function(h){ turns.push({role:"user",content:h.q}); turns.push({role:"assistant",content:h.a}); });
+      turns.push({role:"user", content: SYS+"\n\nDASHBOARD DATA (JSON):\n"+JSON.stringify(context())+"\n\nUser question: "+q});
+      try{
+        var res=await sampleFn(turns,{cache:false, onText:function(u){ bubble.classList.remove("think"); bubble.textContent=u.text; logEl.scrollTop=logEl.scrollHeight; }});
+        bubble.classList.remove("think"); bubble.textContent=res.text; hist.push({q:q,a:res.text});
+      }catch(err){
+        bubble.classList.remove("think");
+        var code=err&&err.code;
+        if(code==="rate_limited"){ bubble.textContent="I'm being rate-limited — wait a few seconds and ask again."; }
+        else if(code==="not_granted"){ bubble.textContent="I need your go-ahead to answer (I use Claude). Ask again and accept the prompt."; }
+        else if(code==="cancelled"){ bubble.textContent="(stopped)"; }
+        else { bubble.textContent="Sorry — I couldn't answer that just now."; }
+      }
+    }
+
+    btn.addEventListener("click",function(){
+      panel.classList.toggle("hide");
+      if(!panel.classList.contains("hide")){ ensureIntro(); if(sampleFn) input.focus(); }
+    });
+    closeb.addEventListener("click",function(){ panel.classList.add("hide"); });
+    form.addEventListener("submit",function(e){ e.preventDefault(); var q=input.value.trim(); if(!q||!sampleFn) return; input.value=""; ask(q); });
+
+    // Resolve the sample capability once. Absence is expected outside claude.ai.
+    (async function(){
+      try{ sampleFn = (window.claude&&claude.use)?await claude.use("sample"):null; }
+      catch(_){ sampleFn=null; }
+      wired=true;
+      if(sampleFn){ foot.textContent="Powered by Claude · grounded in the data on this page."; }
+      else{
+        input.disabled=true; input.placeholder="Open in claude.ai to chat with the coach";
+        form.querySelector("button").disabled=true;
+        foot.textContent="The coach runs on Claude — available when this page is opened in claude.ai.";
+      }
+    })();
+  })();
 })();
 </script>
