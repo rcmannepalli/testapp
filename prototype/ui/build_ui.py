@@ -30,7 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TEAMS = {  # channel → (display name, dot color)
     "#eng-standup": ("Platform", "#0c6e88"),
     "#growth-sync": ("Growth", "#0e9d7d"),
-    "#design-crit": ("Design", "#c15a2b"),
+    "#design-crit": ("Design", "#7a5aa6"),
 }
 LABEL = {
     "acknowledgment": "Acknowledgment", "question_asking": "Question-asking",
