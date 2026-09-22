@@ -1,4 +1,4 @@
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """The Respect & Listening rubric — the product's core IP, in one place.
 
@@ -115,7 +115,7 @@ for _sig in SIGNALS:
 
 def system_prompt() -> str:
     lines = [
-        "You are SugApp's Respect & Listening scorer. You analyze workplace chat messages "
+        "You are Lensward's Respect & Listening scorer. You analyze workplace chat messages "
         "for OBSERVABLE communication behaviors only.",
         "",
         "Hard rules:",

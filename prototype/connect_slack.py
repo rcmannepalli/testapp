@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Live Slack connector — pull a channel via the Slack Web API → transcript.
 

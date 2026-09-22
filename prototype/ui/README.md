@@ -1,4 +1,4 @@
-# SugApp dashboard (SaaS UI)
+# Lensward dashboard (SaaS UI)
 
 A single-page, self-contained dashboard with two views — an **Organization** view
 (aggregate Respect Index, teams, behavior balance) and a **My Mirror** view
@@ -6,7 +6,7 @@ A single-page, self-contained dashboard with two views — an **Organization** v
 the scorer's SQLite database**, so it shows whatever the pipeline actually scored.
 
 ```
-Slack / transcript → score.py --save → sugapp.db → build_ui.py → saas_dashboard.html
+Slack / transcript → score.py --save → lensward.db → build_ui.py → saas_dashboard.html
 ```
 
 ## Files
@@ -34,7 +34,7 @@ Once you've run the scorer with `--save` (live or `--demo`), build from that DB:
 ```bash
 # from prototype/
 python score.py --save --demo sample_transcripts/standup.json   # or a live run
-python ui/build_ui.py --db ../sugapp.db -o ui/saas_dashboard.html
+python ui/build_ui.py --db ../lensward.db -o ui/saas_dashboard.html
 ```
 
 ## What it demonstrates about the product

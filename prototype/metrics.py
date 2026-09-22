@@ -1,4 +1,4 @@
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Per-run observability for the scorer — the 'sensors on the machine'.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Momentum — is respect getting better or worse, and by how much?
 
@@ -15,7 +15,7 @@ Two views, matching the privacy split (PRODUCT.md §5):
     person's own trend, never an org-facing per-individual rollup.
 
 Usage:
-    python momentum.py                       # month buckets, default sugapp.db
+    python momentum.py                       # month buckets, default lensward.db
     python momentum.py --period week
     python momentum.py --channel '#eng-standup'
     python momentum.py --db mine.db --period day

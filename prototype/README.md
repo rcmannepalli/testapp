@@ -1,6 +1,6 @@
-# SugApp — Respect & Listening Scorer (Prototype)
+# Lensward — Respect & Listening Scorer (Prototype)
 
-A standalone prototype of SugApp's core differentiator: scoring everyday workplace
+A standalone prototype of Lensward's core differentiator: scoring everyday workplace
 messages for **observable respect & listening behaviors** — never traits or emotions —
 and rolling them up into a team **Respect Index**.
 
@@ -187,11 +187,11 @@ in [`../docs/PRODUCT.md`](../docs/PRODUCT.md) §8 will read from.
 ```bash
 # Score and persist (works with --demo too, so no key needed to try it):
 python score.py --demo --save sample_transcripts/standup.json
-python score.py --save my_transcript.json            # live run, default sugapp.db
+python score.py --save my_transcript.json            # live run, default lensward.db
 python score.py --save --db team.db my_transcript.json   # custom database path
 
 # Read the accumulated history back:
-python trends.py                 # default sugapp.db
+python trends.py                 # default lensward.db
 python trends.py --db team.db
 ```
 
@@ -282,7 +282,7 @@ by construction **never a name or a quote**. Runs with fewer than `K_ANON`
 participants are suppressed (shown as "suppressed", excluded from the headline).
 
 ```bash
-python dashboard.py                       # default sugapp.db → team_dashboard.html
+python dashboard.py                       # default lensward.db → team_dashboard.html
 python dashboard.py --db team.db --out team.html
 ```
 
@@ -353,11 +353,11 @@ person can only ever see and act on their own record. Opt-in/opt-out act on the
 # Reuse your Slack app; add user scopes openid,email,profile + register the redirect.
 export SLACK_CLIENT_ID=...           # api.slack.com/apps → Basic Information
 export SLACK_CLIENT_SECRET=...
-python consent_server.py --db sugapp.db          # → http://127.0.0.1:8000
+python consent_server.py --db lensward.db          # → http://127.0.0.1:8000
 
 # Offline / no Slack app — roster picker stands in for sign-in:
 python consent.py --import eng.json
-python consent_server.py --dev --db sugapp.db
+python consent_server.py --dev --db lensward.db
 ```
 
 Full 3-legged OAuth needs a registered redirect URL (use ngrok if not on

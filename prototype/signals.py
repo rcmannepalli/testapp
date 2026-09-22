@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Named signals — the plain-English metrics, not raw counts.
 
@@ -17,7 +17,7 @@ Two views, matching the privacy split (PRODUCT.md §5):
   * Per person — the personal mirror (name-attached, the person's own data).
 
 Usage:
-    python signals.py                 # org-wide + every person, default sugapp.db
+    python signals.py                 # org-wide + every person, default lensward.db
     python signals.py Dana            # just one person's signals
     python signals.py --db team.db
 """

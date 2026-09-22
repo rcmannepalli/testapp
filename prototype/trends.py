@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Read back the persisted Respect & Listening history.
 
@@ -9,7 +9,7 @@ person's lifetime mirror tally, and which behaviors fire most. It's the
 text-only stand-in for the dashboards in PRODUCT.md §8 — same data, no UI yet.
 
 Usage:
-    python trends.py                 # read default sugapp.db
+    python trends.py                 # read default lensward.db
     python trends.py --db mine.db
 """
 import os

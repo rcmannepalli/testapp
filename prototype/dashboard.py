@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Team Respect Index dashboard — the org-view counterpart to the personal mirror.
 
@@ -13,7 +13,7 @@ run with fewer than K_ANON participants is shown as "suppressed", never given a
 number, and excluded from the headline aggregate.
 
 Usage:
-    python dashboard.py                  # default sugapp.db → team_dashboard.html
+    python dashboard.py                  # default lensward.db → team_dashboard.html
     python dashboard.py --db team.db --out team.html
 
 By construction this view reads only run-level tallies and behavior counts — it
@@ -177,7 +177,7 @@ def render_page(history: list[dict], counts: list[dict]) -> str:
   <div class="card">{behavior_html(counts)}</div>
 
   <footer>
-    SugApp · "are people heard and treated with dignity here?" — the highest-respect
+    Lensward · "are people heard and treated with dignity here?" — the highest-respect
     number, not the highest-sentiment one.
   </footer>
 </div>

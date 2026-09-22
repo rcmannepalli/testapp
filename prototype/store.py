@@ -1,4 +1,4 @@
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """SQLite persistence for Respect & Listening findings.
 
@@ -31,7 +31,7 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 
-DEFAULT_DB = os.path.join(os.path.dirname(__file__), "sugapp.db")
+DEFAULT_DB = os.path.join(os.path.dirname(__file__), "lensward.db")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (

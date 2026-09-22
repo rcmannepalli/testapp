@@ -1,6 +1,6 @@
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
-"""Cost controls for the SugApp scorer.
+"""Cost controls for the Lensward scorer.
 
 Scoring a transcript is a paid Claude API call, and at scale (every channel,
 every day) the bill is the product's dominant variable cost. This module gives

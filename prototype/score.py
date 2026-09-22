@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
-"""SugApp Respect & Listening scorer — standalone prototype.
+"""Lensward Respect & Listening scorer — standalone prototype.
 
 Usage:
     python score.py sample_transcripts/standup.json
@@ -19,7 +19,7 @@ scores it against the Respect & Listening rubric using Claude, and prints per-me
 findings (with evidence + coaching rewrites) plus a k-anonymized team Respect Index.
 
 With --save, the run and its findings are written to a SQLite database (default
-sugapp.db next to this script; override with --db) so trends accumulate over time.
+lensward.db next to this script; override with --db) so trends accumulate over time.
 Read them back with trends.py.
 
 With --require-consent, only authors who have opted in (see consent.py) are scored
@@ -239,7 +239,7 @@ def main() -> None:
         return value
 
     # Value-bearing flags (pull them out before reading positionals).
-    db_path = take_value("--db", "sugapp.db")
+    db_path = take_value("--db", "lensward.db")
     model = take_value("--model", "claude-haiku-4-5") or MODEL
 
     max_cost = None

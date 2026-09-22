@@ -1,4 +1,4 @@
-# Investor pitch deck — SugApp
+# Investor pitch deck — Lensward
 
 The LaunchUNC investor brief and its sources. **Confidential & proprietary** — see
 [`../../LICENSE`](../../LICENSE) and [`../../IP.md`](../../IP.md). It's deliberately
@@ -13,20 +13,20 @@ only ever "a proprietary, validated behavioral taxonomy," never the rubric itsel
 | `build_pptx.js` | Generates the editable PowerPoint from that content (`pptxgenjs`). |
 | `pitch_print.css` | Print overrides that turn the web deck into one 16:9 page per slide. |
 | `build_pdf.sh` | Renders `pitch_deck.html` → slide-per-page PDF via headless Chromium. |
-| `SugApp_Investor_Brief.pptx` | Built output — editable in PowerPoint / Google Slides (15 slides). |
-| `SugApp_Investor_Brief.pdf` | Built output — ready-to-share PDF (15 pages, 16:9). |
+| `Lensward_Investor_Brief.pptx` | Built output — editable in PowerPoint / Google Slides (15 slides). |
+| `Lensward_Investor_Brief.pdf` | Built output — ready-to-share PDF (15 pages, 16:9). |
 
 ## Regenerate
 
 ```bash
 # PowerPoint (needs Node; pptxgenjs auto-used):
 npm install pptxgenjs        # once, if not present
-node build_pptx.js           # → SugApp_Investor_Brief.pptx
+node build_pptx.js           # → Lensward_Investor_Brief.pptx
 
 # PDF, two options:
 #  a) simplest: open the .pptx in PowerPoint → "Save as PDF"
 #  b) from the web deck, headless Chromium:
-./build_pdf.sh               # → SugApp_Investor_Brief.pdf
+./build_pdf.sh               # → Lensward_Investor_Brief.pdf
 ```
 
 The `.pptx` (native slides) and the Chromium `.pdf` (the web deck paginated) share the
@@ -37,7 +37,7 @@ For an exact match, export the PDF straight from PowerPoint (option a).
 
 - Name is set to **Suguna Mannepalli** (cover byline + copyright).
 - Fill in the **pricing / ask numbers** on the Business model and Ask slides (placeholders).
-- "SugApp" is a working codename — swap for the real (trademark-cleared) name when chosen.
+- "Lensward" is a working codename — swap for the real (trademark-cleared) name when chosen.
 
 ## Deck outline (15 slides)
 

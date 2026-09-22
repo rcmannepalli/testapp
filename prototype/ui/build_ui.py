@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
-"""Build the SugApp dashboard from a real scoring database.
+"""Build the Lensward dashboard from a real scoring database.
 
 Reads findings out of the SQLite store the scorer writes (store.py), computes
 the org + per-person view-model — applying the same Respect Index formula and
@@ -268,7 +268,7 @@ def pct(a, b):
 
 def main():
     args = sys.argv[1:]
-    db = "sugapp.db"
+    db = "lensward.db"
     out = os.path.join(HERE, "saas_dashboard.html")
     if "--db" in args:
         db = args[args.index("--db") + 1]

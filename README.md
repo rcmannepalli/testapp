@@ -1,8 +1,8 @@
-# SugApp
+# Lensward
 
 **A respect & listening culture-coaching platform for the enterprise.**
 
-SugApp helps organizations build a culture of **respect and listening** across the
+Lensward helps organizations build a culture of **respect and listening** across the
 *entire* workforce — not just leaders, not just sales — by measuring and coaching the
 everyday communication behaviors that make people feel **heard** or feel **small**.
 

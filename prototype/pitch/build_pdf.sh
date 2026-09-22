@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-OUT="${1:-SugApp_Investor_Brief.pdf}"
+OUT="${1:-Lensward_Investor_Brief.pdf}"
 PRINT_HTML="$(mktemp --suffix=.html)"
 cat pitch_deck.html > "$PRINT_HTML"
 printf '\n<style>\n' >> "$PRINT_HTML"; cat pitch_print.css >> "$PRINT_HTML"; printf '\n</style>\n' >> "$PRINT_HTML"

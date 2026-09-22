@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Personal mirror — a one-person dashboard generated as a standalone HTML file.
 
@@ -224,7 +224,7 @@ def render_page(author: str, findings: list[dict], timeline: list[dict],
   {findings_html(findings, "disrespectful")}
 
   <footer>
-    SugApp · behaviors, not traits — every flag carries the exact quote it came from.
+    Lensward · behaviors, not traits — every flag carries the exact quote it came from.
   </footer>
 </div>
 </body>

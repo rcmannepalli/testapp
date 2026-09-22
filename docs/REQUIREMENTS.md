@@ -1,4 +1,4 @@
-# SugApp — Requirements Specification
+# Lensward — Requirements Specification
 
 > Status: Draft v1.0 · Last updated: 2026-09-21 · Author: Suguna Mannepalli
 > Proprietary & confidential. See /LICENSE and /IP.md.
@@ -11,7 +11,7 @@
 
 ## 1. Purpose & scope
 
-SugApp measures and coaches **respect and listening** in everyday workplace
+Lensward measures and coaches **respect and listening** in everyday workplace
 communication by scoring chat transcripts against a rubric of *observable
 behaviors*, then surfacing the results as a personal mirror (to the individual)
 and anonymized aggregates (to the org).

@@ -1,8 +1,8 @@
 const pptxgen = require("pptxgenjs");
 const p = new pptxgen();
 p.layout = "LAYOUT_WIDE"; // 13.33 x 7.5
-p.author = "SugApp";
-p.title = "SugApp — Investor Brief";
+p.author = "Lensward";
+p.title = "Lensward — Investor Brief";
 
 // ---- palette (no # ; never 8-digit) ----
 const INK = "0F2A2E", INKSOFT = "12312F", PAPER = "FFFFFF";
@@ -44,7 +44,7 @@ s.addText("The number no one measures:\nare people actually heard?", {
   color: PAPER, lineSpacingMultiple: 1.0,
 });
 s.addText([
-  { text: "SugApp turns everyday work conversations into a ", options: { color: "C9DBD3" } },
+  { text: "Lensward turns everyday work conversations into a ", options: { color: "C9DBD3" } },
   { text: "Respect Index", options: { color: JADE, bold: true } },
   { text: " — and gives each person private coaching — without surveillance. When everything else is changing, it’s the signal that tells you whether your teams are holding together.", options: { color: "C9DBD3" } },
 ], { x: MX, y: 3.95, w: 7.4, h: 1.7, fontFace: SANS, fontSize: 16, lineSpacingMultiple: 1.15 });
@@ -66,7 +66,7 @@ s.addText("RESPECT INDEX", { x: 9.0, y: 3.92, w: 3.7, h: 0.3, align: "center", f
 s.addText("A single, trending, team-level score — the highest-respect number, not the highest-sentiment one.", {
   x: 8.85, y: 5.55, w: 4.0, h: 0.9, align: "center", fontFace: SANS, italic: true, fontSize: 11.5, color: "9DB4AE",
 });
-s.addText("SugApp (working name)  ·  Confidential & Proprietary  ·  Prepared for Launch Chapel Hill", {
+s.addText("Lensward (working name)  ·  Confidential & Proprietary  ·  Prepared for Launch Chapel Hill", {
   x: MX, y: 6.95, w: CW, h: 0.3, fontFace: SANS, fontSize: 10.5, color: "7E958F",
 });
 
@@ -107,7 +107,7 @@ s.addText([
 ], { x: MX + 0.35, y: bcy + 0.85, w: bcw - 0.7, h: 2.1, fontFace: SANS, fontSize: 14, color: INKSOFT, lineSpacingMultiple: 1.05 });
 const bx2 = W - MX - bcw;
 card(s, bx2, bcy, bcw, bch, PAPER);
-s.addText("What SugApp gives leadership", { x: bx2 + 0.35, y: bcy + 0.28, w: bcw - 0.7, h: 0.4, fontFace: SANS, bold: true, fontSize: 17, color: JADE });
+s.addText("What Lensward gives leadership", { x: bx2 + 0.35, y: bcy + 0.28, w: bcw - 0.7, h: 0.4, fontFace: SANS, bold: true, fontSize: 17, color: JADE });
 s.addText([
   { text: "Continuous — from real behavior, not a once-a-year form.", options: { bullet: { indent: 15 }, breakLine: true, paraSpaceAfter: 8 } },
   { text: "Aggregated and k-anonymized — no one is exposed, so nothing is hidden out of fear.", options: { bullet: { indent: 15 }, breakLine: true, paraSpaceAfter: 8 } },
@@ -151,7 +151,7 @@ threeCards("04 · Why now", "The signal was always there. The reader just arrive
 s = p.addSlide(); bg(s, PAPER);
 eyebrow(s, "05 · What it is");
 title(s, "A respect & listening layer for the\nmodern workplace.");
-s.addText("Connect a channel. SugApp reads the conversation with consent, and produces two things:", {
+s.addText("Connect a channel. Lensward reads the conversation with consent, and produces two things:", {
   x: MX, y: 2.05, w: 6.6, h: 0.7, fontFace: SANS, fontSize: 15, color: INKSOFT, lineSpacingMultiple: 1.1,
 });
 s.addText([
@@ -212,7 +212,7 @@ s.addText([
 
 // ===================== 8 · SELF-MANAGING TEAMS =====================
 threeCards("07 · Self-managing teams", "Teams that steady themselves through change — no surveillance.",
-  "In uncertain times, teams need to self-correct fast. SugApp gives a team a shared, private signal of its own health — a mirror for the group, not a report up the chain.", [
+  "In uncertain times, teams need to self-correct fast. Lensward gives a team a shared, private signal of its own health — a mirror for the group, not a report up the chain.", [
   { h: "A team mirror, not a manager’s dashboard", b: "The team sees its own health first and owns the response — support, not scrutiny." },
   { h: "Early warning during change", b: "Rising dismissiveness and falling acknowledgement show up weeks before resignations do." },
   { h: "Self-correction", b: "Shared awareness lets a team reset its own norms mid-reorg — the fastest, cheapest intervention there is." },
@@ -346,7 +346,7 @@ vstats.forEach((it, i) => {
   s.addText(it[1], { x: x + 0.3, y: vy + 1.25, w: vcw - 0.6, h: 1.0, fontFace: SANS, fontSize: 13, color: INKSOFT, lineSpacingMultiple: 1.08 });
   s.addText(it[2], { x: x + 0.3, y: vy + 2.28, w: vcw - 0.6, h: 0.3, fontFace: SANS, italic: true, fontSize: 10.5, color: MUTED });
 });
-s.addText("The market feels unheard and can’t see itself — exactly the gap SugApp is built for. Our own conversations confirm the demand.", {
+s.addText("The market feels unheard and can’t see itself — exactly the gap Lensward is built for. Our own conversations confirm the demand.", {
   x: MX, y: 6.1, w: CW, h: 0.5, fontFace: SANS, italic: true, fontSize: 13, color: MUTED,
 });
 
@@ -356,7 +356,7 @@ eyebrow(s, "13 · Founder");
 title(s, "Built from twenty years inside the problem.");
 s.addText([
   { text: "Suguna Mannepalli", options: { bold: true, color: INKSOFT } },
-  { text: " — 20+ years leading teams in corporate IT, and an accredited leadership coach (Association for Coaching). SugApp comes from both chairs: the operator who watched culture break, and the coach who helps people change.", options: { color: INKSOFT } },
+  { text: " — 20+ years leading teams in corporate IT, and an accredited leadership coach (Association for Coaching). Lensward comes from both chairs: the operator who watched culture break, and the coach who helps people change.", options: { color: INKSOFT } },
 ], { x: MX, y: 1.95, w: CW, h: 0.9, fontFace: SANS, fontSize: 15, lineSpacingMultiple: 1.12 });
 const fdw = 5.85, fdh = 2.5, fdy = 3.2;
 card(s, MX, fdy, fdw, fdh, CARD);
@@ -370,7 +370,7 @@ s.addText([
   { text: "Heard", options: { bold: true } },
   { text: ", and given room to reflect, they improve on their own — and outperform. The lost skill of our moment isn’t communication — it’s listening.", options: {} },
 ], { x: fdx2 + 0.35, y: fdy + 0.85, w: fdw - 0.7, h: 1.5, fontFace: SANS, fontSize: 13.5, color: INKSOFT, lineSpacingMultiple: 1.08 });
-s.addText("SugApp productizes that coaching truth: a private mirror for self-reflection, never a manager’s verdict.", {
+s.addText("Lensward productizes that coaching truth: a private mirror for self-reflection, never a manager’s verdict.", {
   x: MX, y: 6.0, w: CW, h: 0.6, fontFace: SERIF, italic: true, fontSize: 16, color: INKSOFT,
 });
 
@@ -390,9 +390,9 @@ s.addText([
   { text: "Respect is the leading indicator of whether they can", options: { color: JADE, bold: true } },
   { text: " — and no one else is measuring it.", options: { color: PAPER } },
 ], { x: MX, y: 4.9, w: CW, h: 1.3, fontFace: SERIF, fontSize: 23, lineSpacingMultiple: 1.1 });
-s.addText("SugApp (working name)  ·  © 2026 Suguna Mannepalli. All rights reserved.  ·  Confidential & Proprietary — contains trade-secret methodology.", {
+s.addText("Lensward (working name)  ·  © 2026 Suguna Mannepalli. All rights reserved.  ·  Confidential & Proprietary — contains trade-secret methodology.", {
   x: MX, y: 6.9, w: CW, h: 0.3, fontFace: SANS, fontSize: 10, color: "7E958F",
 });
 
-p.writeFile({ fileName: "/tmp/claude-0/-home-user-testapp/5c385122-4c38-5138-bc93-17090acbf689/scratchpad/SugApp_Investor_Brief.pptx" })
+p.writeFile({ fileName: "/tmp/claude-0/-home-user-testapp/5c385122-4c38-5138-bc93-17090acbf689/scratchpad/Lensward_Investor_Brief.pptx" })
   .then(f => console.log("WROTE", f));

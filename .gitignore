@@ -30,7 +30,7 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-# Python (SugApp prototype)
+# Python (Lensward prototype)
 .venv/
 __pycache__/
 *.pyc
@@ -38,7 +38,7 @@ __pycache__/
 mirror_*.html
 team_dashboard.html
 
-# SugApp UI generated/demo artifacts
+# Lensward UI generated/demo artifacts
 prototype/ui/demo.db
 prototype/ui/*.db
 prototype/**/__pycache__/

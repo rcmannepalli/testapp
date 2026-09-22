@@ -1,4 +1,4 @@
-# Intellectual Property & Provenance — SugApp
+# Intellectual Property & Provenance — Lensward
 
 > **Not legal advice.** This is an internal record to help protect the work. Confirm
 > anything binding with an attorney and with UNC's Office of Technology
@@ -6,7 +6,7 @@
 
 ## 1. Ownership
 
-SugApp — its source code, product design, the behavioral rubric, and the Respect
+Lensward — its source code, product design, the behavioral rubric, and the Respect
 Index methodology — was **conceived and created independently by `<Your Legal Name>`**
 (the "Owner"), using the Owner's own equipment and accounts, on the Owner's own time.
 
@@ -26,7 +26,7 @@ human-directed expression vests in the Owner.
 |------|-------|
 | Repository | `rcmannepalli/testapp` |
 | Working branch | `claude/adoring-ride-d7uwsx` |
-| SugApp prototype first built | 2026-07-28 |
+| Lensward prototype first built | 2026-07-28 |
 | Last update at time of writing | 2026-07-29 |
 | Record of authorship | Git commit history (timestamped, immutable hashes) |
 
@@ -35,7 +35,7 @@ Keep the repository **private**. Do not force-push or rewrite history in a way t
 destroys the timeline.
 
 > ⚠️ The base repository's initial commit ("first commit", 2019) is an unrelated
-> template and predates SugApp. All SugApp work begins 2026-07-28.
+> template and predates Lensward. All Lensward work begins 2026-07-28.
 
 ## 3. Trade secrets — do NOT disclose
 
@@ -53,7 +53,7 @@ Pitch the **outcome** (the Index, the dashboards, the trust model). Never the me
 
 - [x] **Copyright** — automatic; asserted in `LICENSE` and file headers.
 - [x] **Trade-secret designation** — documented above and in `LICENSE`.
-- [ ] **Name / trademark** — "SugApp" is a working codename. Choose and clear a real
+- [ ] **Name / trademark** — "Lensward" is a working codename. Choose and clear a real
       name; file an intent-to-use trademark before going public with the brand.
 - [ ] **Entity** — form an LLC/C-corp and **assign this IP to it** (an IP assignment
       agreement) so ownership is clean and separate from UNC and any collaborators.

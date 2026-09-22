@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SugApp — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
+# Lensward — proprietary & confidential. © 2026 <Your Legal Name>. All rights reserved.
 # Trade-secret methodology; not for distribution. See /LICENSE and /IP.md.
 """Behavior fingerprint — which behaviors a person leans on, with their own words.
 
@@ -13,7 +13,7 @@ Name-attached on purpose: this is the personal-mirror surface (PRODUCT.md §5),
 the one place a name attaches to behavior. The org never sees it.
 
 Usage:
-    python fingerprint.py                 # every person, default sugapp.db
+    python fingerprint.py                 # every person, default lensward.db
     python fingerprint.py Dana            # one person
     python fingerprint.py --db team.db
 """
